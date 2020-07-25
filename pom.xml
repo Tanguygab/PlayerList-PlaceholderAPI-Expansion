@@ -5,11 +5,11 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>io.github.Tanguygab</groupId>
-    <artifactId>PlayerListExpansion</artifactId>
-    <version>1.0</version>
+    <artifactId>Expansion-PlayerList</artifactId>
+    <version>1.1</version>
     <packaging>jar</packaging>
 
-    <name>PlayerListExpansion</name>
+    <name>Expansion-PlayerList</name>
 
     <properties>
         <java.version>1.8</java.version>

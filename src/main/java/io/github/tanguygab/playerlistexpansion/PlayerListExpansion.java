@@ -27,13 +27,22 @@ public class PlayerListExpansion extends PlaceholderExpansion {
     public String getIdentifier() {return "playerlist";}
 
     @Override
-    public String getVersion() {return "1.0.0";}
+    public String getVersion() {return "1.1";}
 
     @Override
     public String onRequest(OfflinePlayer player, String identifier) {
 
         List<String> args = new ArrayList<>(Arrays.asList(identifier.split(",")));
-            args = PlaceholderAPI.setBracketPlaceholders(player, args);
+            for (Integer i = 0; i < args.size(); i++) {
+                if (args.get(i).startsWith("[") && args.get(i).endsWith("]")) {
+                    args.set(i, PlaceholderAPI.setPlaceholders(player, args.get(i).replaceFirst("\\[", "%").substring(0,args.get(i).length()-1)+"%"));
+                }
+            }
+            for (Integer i = 0; i < args.size(); i++) {
+                if (args.get(i).startsWith("{") && args.get(i).endsWith("}")) {
+                    args.set(i, PlaceholderAPI.setPlaceholders(player, args.get(i).replaceFirst("\\{", "%").substring(0,args.get(i).length()-1)+"%"));
+                }
+            }
 
             if (!args.get(0).equals("online") && !args.get(0).equals("offline") && !args.get(0).equals("all")) {
                 return "&3&lValid Syntax: &9%" + "playerlist_&b<list type>&9,&b<subtype>&9,&b<yes/no>&9,&b<output>&9,&b<subtype value>&9%\n" + "&3&lValid List Types: &9online&f, &9offline&f, &9all&f.";
