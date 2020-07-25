@@ -27,7 +27,7 @@ public class PlayerListExpansion extends PlaceholderExpansion {
     public String getIdentifier() {return "playerlist";}
 
     @Override
-    public String getVersion() {return "1.1";}
+    public String getVersion() {return "1.2";}
 
     @Override
     public String onRequest(OfflinePlayer player, String identifier) {
@@ -43,6 +43,7 @@ public class PlayerListExpansion extends PlaceholderExpansion {
                     args.set(i, PlaceholderAPI.setPlaceholders(player, args.get(i).replaceFirst("\\{", "%").substring(0,args.get(i).length()-1)+"%"));
                 }
             }
+            if (args.get(3).equals("list")) {args.set(3, "list-\\. ");}
 
             if (!args.get(0).equals("online") && !args.get(0).equals("offline") && !args.get(0).equals("all")) {
                 return "&3&lValid Syntax: &9%" + "playerlist_&b<list type>&9,&b<subtype>&9,&b<yes/no>&9,&b<output>&9,&b<subtype value>&9%\n" + "&3&lValid List Types: &9online&f, &9offline&f, &9all&f.";
@@ -50,8 +51,10 @@ public class PlayerListExpansion extends PlaceholderExpansion {
                 return "&3&lValid List SubTypes: &9normal&f, &9perm&f, &9world&f, &9nearby&f.";
             } else if (args.size() == 2 || !args.get(2).equals("yes") && !args.get(2).equals("no")) {
                 return "&4&lError&c: You have to use either &9yes &cor &9no &cin the third argument.";
-            } else if (args.size() == 3 || !args.get(3).equals("list") && !args.get(3).equals("amount") && !isNumeric(args.get(3))) {
+            } else if (args.size() == 3 || !args.get(3).startsWith("list") && !args.get(3).equals("amount") && !isNumeric(args.get(3))) {
                 return "&3&lValid Output Types: &9list&f, &9amount&f, &9a number starting from 0&f.";
+            } else if (args.get(3).startsWith("list") && !args.get(3).startsWith("list-")) {
+                return "&4&lError: &cUse `&9list-<separator>&c` to change the characters between names in the list. Use &9\\. &cfor &9,";
             } else if (args.size() == 4 && (args.get(1).equals("world") || args.get(1).equals("perm") || args.get(1).equals("nearby"))) {
                 return "&4&lError&c: &cYou have to specify a &9permission&c/&9world&c/&9radius&c.";
             } else if (args.get(1).equals("nearby") && !isNumeric(args.get(4))) {
@@ -74,7 +77,7 @@ public class PlayerListExpansion extends PlaceholderExpansion {
                 }
                 Collections.sort(players);
 
-                if (args.get(3).equals("list")) {return players.toString().replace("[", "").replace("]", "");}
+                if (args.get(3).startsWith("list")) {return players.toString().replace("[", "").replace("]", "").replace(", ", args.get(3).replaceFirst("list-", "")).replace("\\.", ",");}
                 else if (args.get(3).equals("amount")) {return players.size()+"";}
                 else if (players.size() != 0 && Integer.parseInt(args.get(3)) < players.size()) {return players.get(Integer.parseInt(args.get(3)))+"";}
                 else {return "Offline";}
@@ -90,7 +93,7 @@ public class PlayerListExpansion extends PlaceholderExpansion {
                 }
                 Collections.sort(playersPerm);
 
-                if (args.get(3).equals("list")) {return playersPerm.toString().replace("[", "").replace("]", "");}
+                if (args.get(3).startsWith("list")) {return playersPerm.toString().replace("[", "").replace("]", "").replace(", ", args.get(3).replaceFirst("list-", "")).replace("\\.", ",");}
                 else if (args.get(3).equals("amount")) {return playersPerm.size()+"";}
                 else if (playersPerm.size() != 0 && Integer.parseInt(args.get(3)) < playersPerm.size()) {return playersPerm.get(Integer.parseInt(args.get(3)))+"";}
                 else {return "Offline";}
@@ -105,7 +108,7 @@ public class PlayerListExpansion extends PlaceholderExpansion {
                 }
                 Collections.sort(playersWorld);
 
-                if (args.get(3).equals("list")) {return playersWorld.toString().replace("[", "").replace("]", "");}
+                if (args.get(3).startsWith("list")) {return playersWorld.toString().replace("[", "").replace("]", "").replace(", ", args.get(3).replaceFirst("list-", "")).replace("\\.", ",");}
                 else if (args.get(3).equals("amount")) {return playersWorld.size()+"";}
                 else if (playersWorld.size() != 0 && Integer.parseInt(args.get(3)) < playersWorld.size()) {return playersWorld.get(Integer.parseInt(args.get(3)))+"";}
                 else {return "Offline";}
@@ -121,7 +124,7 @@ public class PlayerListExpansion extends PlaceholderExpansion {
                 }
                 Collections.sort(playersNearby);
 
-                if (args.get(3).equals("list")) {return playersNearby.toString().replace("[", "").replace("]", "");}
+                if (args.get(3).startsWith("list")) {return playersNearby.toString().replace("[", "").replace("]", "").replace(", ", args.get(3).replaceFirst("list-", "")).replace("\\.", ",");}
                 else if (args.get(3).equals("amount")) {return playersNearby.size()+"";}
                 else if (playersNearby.size() != 0 && Integer.parseInt(args.get(3)) < playersNearby.size()) {return playersNearby.get(Integer.parseInt(args.get(3)))+"";}
                 else {return "Offline";}
