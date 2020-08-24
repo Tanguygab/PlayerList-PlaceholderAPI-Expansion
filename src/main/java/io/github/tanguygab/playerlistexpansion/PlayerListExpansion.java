@@ -34,8 +34,7 @@ public class PlayerListExpansion extends PlaceholderExpansion {
 
         List<String> args = new ArrayList<>(Arrays.asList(identifier.split(",")));
             for (Integer i = 0; i < args.size(); i++) {
-                if (i == 4 && args.get(1).equals("placeholder")) {}
-                else if (args.get(i).startsWith("[") && args.get(i).endsWith("]")) {
+                if (args.get(i).startsWith("[") && args.get(i).endsWith("]")) {
                     args.set(i, PlaceholderAPI.setPlaceholders(player, args.get(i).replaceFirst("\\[", "%").substring(0,args.get(i).length()-1)+"%"));
                 }
                 else if (args.get(i).startsWith("{") && args.get(i).endsWith("}")) {
@@ -54,8 +53,8 @@ public class PlayerListExpansion extends PlaceholderExpansion {
                 return "&3&lValid Output Types: &9list&f, &9amount&f, &9a number starting from 0&f.";
             } else if (args.get(3).startsWith("list") && !args.get(3).startsWith("list-")) {
                 return "&4&lError: &cUse `&9list-<separator>&c` to change the characters between names in the list. Use &9\\. &cfor &9,";
-            } else if (args.size() == 4 && (args.get(1).equals("world") || args.get(1).equals("perm") || args.get(1).equals("nearby"))) {
-                return "&4&lError&c: &cYou have to specify a &9permission&c/&9world&c/&9radius&c.";
+            } else if (args.size() == 4 && (args.get(1).equals("world") || args.get(1).equals("perm") || args.get(1).equals("nearby") || args.get(1).equals("placeholder"))) {
+                return "&4&lError&c: &cYou have to specify a &9permission&c/&9world&c/&9radius/placeholder&c.";
             } else if (args.get(1).equals("nearby") && !isNumeric(args.get(4))) {
                 return "&4&lError&c: &cYou have to provide a number for the radius!";
             } else if ((args.get(0).equals("offline") || args.get(0).equals("all")) && (args.get(1).equals("world") || args.get(1).equals("nearby") || args.get(1).equals("cansee") || args.get(1).equals("placeholder") || args.get(1).equals("version"))) {
@@ -198,13 +197,9 @@ public class PlayerListExpansion extends PlaceholderExpansion {
                 else {listType = listOffline;}
                 ArrayList<String> playersPlaceholder = new ArrayList<>();
                 for (OfflinePlayer p : listType) {
-                    String placeholder = "nothing";
-                    if (args.get(4).startsWith("[") && args.get(4).endsWith("]")) {
-                        placeholder = args.get(4).replaceFirst("\\[", "%").substring(0,args.get(4).length()-1)+"%";
-                    }
-                    else if (args.get(4).startsWith("{") && args.get(4).endsWith("}")) {
-                        placeholder = args.get(4).replaceFirst("\\{", "%").substring(0,args.get(4).length()-1)+"%";
-                    }
+
+                    String placeholder = "%"+args.get(4)+"%";
+
                     if (args.get(0).equals("offline") && listOnline.contains(p)) {}
                     else {
                         if (PlaceholderAPI.setPlaceholders(player, placeholder).equals(PlaceholderAPI.setPlaceholders(p, placeholder))) {
