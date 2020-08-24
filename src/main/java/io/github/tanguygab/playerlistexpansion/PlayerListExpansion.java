@@ -47,8 +47,8 @@ public class PlayerListExpansion extends PlaceholderExpansion {
 
             if (!args.get(0).equals("online") && !args.get(0).equals("offline") && !args.get(0).equals("all")) {
                 return "&3&lValid Syntax: &9%" + "playerlist_&b<list type>&9,&b<subtype>&9,&b<yes/no>&9,&b<output>&9,&b<subtype value>&9%\n" + "&3&lValid List Types: &9online&f, &9offline&f, &9all&f.";
-            } else if (args.size() == 1 || !args.get(1).equals("normal") && !args.get(1).equals("perm") && !args.get(1).equals("world") && !args.get(1).equals("nearby")) {
-                return "&3&lValid List SubTypes: &9normal&f, &9perm&f, &9world&f, &9nearby&f.";
+            } else if (args.size() == 1 || !args.get(1).equals("normal") && !args.get(1).equals("perm") && !args.get(1).equals("world") && !args.get(1).equals("nearby") && !args.get(1).equals("whitelisted") && !args.get(1).equals("banned")) {
+                return "&3&lValid List SubTypes: &9normal&f, &9perm&f, &9world&f, &9nearby&f &9whitelisted&f, &9banned&f.";
             } else if (args.size() == 2 || !args.get(2).equals("yes") && !args.get(2).equals("no")) {
                 return "&4&lError&c: You have to use either &9yes &cor &9no &cin the third argument.";
             } else if (args.size() == 3 || !args.get(3).startsWith("list") && !args.get(3).equals("amount") && !isNumeric(args.get(3))) {
@@ -129,6 +129,49 @@ public class PlayerListExpansion extends PlaceholderExpansion {
                 else if (playersNearby.size() != 0 && Integer.parseInt(args.get(3)) < playersNearby.size()) {return playersNearby.get(Integer.parseInt(args.get(3)))+"";}
                 else {return "Offline";}
 
+            case "whitelisted":
+                if (args.get(0).equals("online")) {listType = listOnline.toArray(new OfflinePlayer[0]);}
+                else {listType = listOffline;}
+                ArrayList<String> playersWhitelisted = new ArrayList<>();
+                for (OfflinePlayer p : listType) {
+                    if (args.get(2).equals("no") && p.getName().equals(player.getName())) {}
+                    else {
+                        if (args.get(0).equals("offline") && listOnline.contains(p)) {}
+                        else {
+                            if (p.isWhitelisted()) {
+                                playersWhitelisted.add(p.getName());
+                            }
+                        }
+                    }
+                }
+                Collections.sort(playersWhitelisted);
+
+                if (args.get(3).startsWith("list")) {return playersWhitelisted.toString().replace("[", "").replace("]", "").replace(", ", args.get(3).replaceFirst("list-", "")).replace("\\.", ",");}
+                else if (args.get(3).equals("amount")) {return playersWhitelisted.size()+"";}
+                else if (playersWhitelisted.size() != 0 && Integer.parseInt(args.get(3)) < playersWhitelisted.size()) {return playersWhitelisted.get(Integer.parseInt(args.get(3)))+"";}
+                else {return "Offline";}
+
+            case "banned":
+                if (args.get(0).equals("online")) {listType = listOnline.toArray(new OfflinePlayer[0]);}
+                else {listType = listOffline;}
+                ArrayList<String> playersBanned = new ArrayList<>();
+                for (OfflinePlayer p : listType) {
+                    if (args.get(2).equals("no") && p.getName().equals(player.getName())) {}
+                    else {
+                        if (args.get(0).equals("offline") && listOnline.contains(p)) {}
+                        else {
+                            if (p.isBanned()) {
+                                playersBanned.add(p.getName());
+                            }
+                        }
+                    }
+                }
+                Collections.sort(playersBanned);
+
+                if (args.get(3).startsWith("list")) {return playersBanned.toString().replace("[", "").replace("]", "").replace(", ", args.get(3).replaceFirst("list-", "")).replace("\\.", ",");}
+                else if (args.get(3).equals("amount")) {return playersBanned.size()+"";}
+                else if (playersBanned.size() != 0 && Integer.parseInt(args.get(3)) < playersBanned.size()) {return playersBanned.get(Integer.parseInt(args.get(3)))+"";}
+                else {return "Offline";}
         }
 
         return "Offline";
