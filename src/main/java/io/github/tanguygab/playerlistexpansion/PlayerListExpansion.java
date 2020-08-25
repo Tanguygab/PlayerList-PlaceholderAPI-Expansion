@@ -35,7 +35,7 @@ public class PlayerListExpansion extends PlaceholderExpansion {
 
     @Override
     public String getVersion() {
-        return "1.4";
+        return "1.5";
     }
 
     @Override
@@ -67,7 +67,9 @@ public class PlayerListExpansion extends PlaceholderExpansion {
             return "&4&lError&c: &cYou have to specify a &9permission&c/&9world&c/&9radius/placeholder/version&c.";
         } else if (args.get(1).equals("nearby") && !isNumeric(args.get(4))) {
             return "&4&lError&c: &cYou have to provide a number for the radius!";
-        } else if ((args.get(0).equals("offline") || args.get(0).equals("all")) && (args.get(1).equals("world") || args.get(1).equals("nearby") || args.get(1).equals("cansee") || args.get(1).equals("placeholder") || args.get(1).equals("version"))) {
+        } else if (args.get(1).equals("placeholder") && !args.get(4).contains("||")) {
+            return "&4&lError&c: &cYou have to provide an output to check separated by || !";
+        } else if ((args.get(0).equals("offline") || args.get(0).equals("all")) && (args.get(1).equals("world") || args.get(1).equals("nearby") || args.get(1).equals("cansee") || args.get(1).equals("version"))) {
             return "&cUnsupported =/";
         }
 
@@ -200,21 +202,16 @@ public class PlayerListExpansion extends PlaceholderExpansion {
 
             case "banned":
                 if (args.get(0).equals("online")) {
-                    listType = listOnline.toArray(new OfflinePlayer[0]);
+                    return "&4&lError: &cWait, how is that useful? Banned players can't be online lol";
                 } else {
                     listType = listOffline;
                 }
                 ArrayList<String> playersBanned = new ArrayList<>();
                 for (OfflinePlayer p : listType) {
-                    if (args.get(2).equals("no") && p.getName().equals(player.getName())) {
-                    } else {
-                        if (args.get(0).equals("offline") && listOnline.contains(p)) {
-                        } else {
-                            if (p.isBanned()) {
-                                playersBanned.add(p.getName());
-                            }
-                        }
+                    if (p.isBanned()) {
+                        playersBanned.add(p.getName());
                     }
+
                 }
                 Collections.sort(playersBanned);
 
@@ -262,12 +259,14 @@ public class PlayerListExpansion extends PlaceholderExpansion {
                 ArrayList<String> playersPlaceholder = new ArrayList<>();
                 for (OfflinePlayer p : listType) {
 
-                    String placeholder = "%" + args.get(4) + "%";
-
-                    if (args.get(0).equals("offline") && listOnline.contains(p)) {
-                    } else {
-                        if (PlaceholderAPI.setPlaceholders(player, placeholder).equals(PlaceholderAPI.setPlaceholders(p, placeholder))) {
-                            playersPlaceholder.add(p.getName());
+                    String[] placeholder = args.get(4).split("\\|\\|");
+                    if (args.get(2).equals("no") && p.getName().equals(player.getName())) {}
+                    else {
+                        if (args.get(0).equals("offline") && listOnline.contains(p)) {
+                        } else {
+                            if (PlaceholderAPI.setPlaceholders(p, "%"+placeholder[0]+"%").equals(PlaceholderAPI.setBracketPlaceholders(player, placeholder[1]))) {
+                                playersPlaceholder.add(p.getName());
+                            }
                         }
                     }
                 }
