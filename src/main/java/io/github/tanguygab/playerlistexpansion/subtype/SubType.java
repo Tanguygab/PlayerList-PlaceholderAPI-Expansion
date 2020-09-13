@@ -55,6 +55,8 @@ public abstract class SubType {
 			return new Placeholder(countSelf, output, subtypevalue);
 		case "version":
 			return new Version(countSelf, output, subtypevalue);
+		case "gamemode":
+			return new Gamemode(countSelf, output, subtypevalue);
 		default: 
 			return null;
 		}
