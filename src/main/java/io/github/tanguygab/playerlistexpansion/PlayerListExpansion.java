@@ -1,21 +1,63 @@
 package io.github.tanguygab.playerlistexpansion;
 
-import java.lang.reflect.Array;
 import java.util.*;
+import java.util.stream.Collectors;
 
-import me.clip.placeholderapi.PlaceholderAPI;
+import io.github.tanguygab.playerlistexpansion.filters.Filter;
+import me.clip.placeholderapi.expansion.Configurable;
 import org.bukkit.OfflinePlayer;
 
-import io.github.tanguygab.playerlistexpansion.playerlist.PlayerList;
 import me.clip.placeholderapi.expansion.PlaceholderExpansion;
+import org.bukkit.configuration.ConfigurationSection;
 
-public class PlayerListExpansion extends PlaceholderExpansion {
+public class PlayerListExpansion extends PlaceholderExpansion implements Configurable {
 
-	private Map<String, PlayerList> map = new HashMap<String, PlayerList>();
+	private static PlayerListExpansion instance;
+	private final Map<String, PlayerList> lists = new HashMap<>();
+	private final List<String> placeholders = new ArrayList<>();
 
-	@Override
-	public boolean canRegister() {
-		return true;
+	public final String offlineText;
+	public final String argumentSeparator;
+	private final static Map<String, Object> defaults = new LinkedHashMap<String,Object>() {{
+		put("offline-text","Offline");
+		put("argument-separator","||");
+		Map<String,Object> staffList = new LinkedHashMap<String, Object>() {{
+			put("type","ONLINE");
+			put("included",true);
+			put("filters",Arrays.asList("PERMISSION:group.staff","CANSEE"));
+		}};
+		put("lists",new HashMap<String, Map<String,Object>>() {{put("staff",staffList);}});
+	}};
+
+	public PlayerListExpansion() {
+		instance = this;
+		offlineText = getString("offline-text","Offline");
+		argumentSeparator = getString("argument-separator","||");
+
+		ConfigurationSection config = getConfigSection("lists");
+		if (config == null) return;
+		config.getValues(false).forEach((list, obj) -> {
+			ConfigurationSection cfg = getConfigSection("lists." + list);
+			if (cfg == null) return;
+			ListType type = ListType.find(cfg.getString("type", "ONLINE"));
+			if (type == null) return;
+
+			boolean included = cfg.getBoolean("included", true);
+
+			List<Filter> filters = new ArrayList<>();
+			cfg.getStringList("filters").forEach(filter -> {
+				String[] args = filter.split(":");
+				Filter f = Filter.find(args[0], args.length > 1 ? args[1] : null);
+				if (f != null) filters.add(f);
+			});
+
+			lists.put(list, new PlayerList(type, filters, included));
+		});
+		placeholders.addAll(lists.keySet().stream().map(listName->"%playerlist_"+listName+"_<list|amount|#>%").collect(Collectors.toList()));
+	}
+
+	public static PlayerListExpansion get() {
+		return instance;
 	}
 
 	@Override
@@ -30,25 +72,24 @@ public class PlayerListExpansion extends PlaceholderExpansion {
 
 	@Override
 	public String getVersion() {
-		return "2.1";
+		return "3.0.0";
+	}
+
+	@Override
+	public List<String> getPlaceholders() {
+		return placeholders;
 	}
 
 	@Override
 	public String onRequest(OfflinePlayer player, String identifier) {
-		List<String> args = new ArrayList<>(Arrays.asList(identifier.split(",")));
+		String[] args = identifier.split("_");
+		String list = args[0];
+		String arg = args.length > 1 ? args[1] : "amount";
+		return lists.containsKey(list) ? lists.get(list).getText(player,arg) : null;
+	}
 
-		for (Integer i = 0; i < args.size(); i++) {
-			if (args.get(i).startsWith("[") && args.get(i).endsWith("]")) {
-				args.set(i, PlaceholderAPI.setPlaceholders(player, args.get(i).replaceFirst("\\[", "%").substring(0, args.get(i).length() - 1) + "%"));
-			} else if (args.get(i).startsWith("{") && args.get(i).endsWith("}")) {
-				args.set(i, PlaceholderAPI.setPlaceholders(player, args.get(i).replaceFirst("\\{", "%").substring(0, args.get(i).length() - 1) + "%"));
-			}
-		}
-			identifier = args.toString().substring(0, args.toString().length()-1).replaceFirst("\\[", "").replace(", ",",");
-
-		if (!map.containsKey(identifier)) {
-			map.put(identifier, PlayerList.compile(identifier));
-		}
-		return map.get(identifier).getText(player);
+	@Override
+	public Map<String, Object> getDefaults() {
+		return defaults;
 	}
 }
