@@ -5,19 +5,20 @@ import java.util.stream.Collectors;
 
 import io.github.tanguygab.playerlistexpansion.filters.Filter;
 import me.clip.placeholderapi.expansion.Configurable;
+import me.clip.placeholderapi.expansion.Taskable;
 import org.bukkit.OfflinePlayer;
 
 import me.clip.placeholderapi.expansion.PlaceholderExpansion;
 import org.bukkit.configuration.ConfigurationSection;
 
-public class PlayerListExpansion extends PlaceholderExpansion implements Configurable {
+public class PlayerListExpansion extends PlaceholderExpansion implements Taskable, Configurable {
 
 	private static PlayerListExpansion instance;
 	private final Map<String, PlayerList> lists = new HashMap<>();
 	private final List<String> placeholders = new ArrayList<>();
 
-	public final String offlineText;
-	public final String argumentSeparator;
+	public String offlineText;
+	public String argumentSeparator;
 	private final static Map<String, Object> defaults = new LinkedHashMap<String,Object>() {{
 		put("offline-text","Offline");
 		put("argument-separator","||");
@@ -31,6 +32,13 @@ public class PlayerListExpansion extends PlaceholderExpansion implements Configu
 
 	public PlayerListExpansion() {
 		instance = this;
+	}
+	public static PlayerListExpansion get() {
+		return instance;
+	}
+
+	@Override
+	public void start() {
 		offlineText = getString("offline-text","Offline");
 		argumentSeparator = getString("argument-separator","||");
 
@@ -56,9 +64,8 @@ public class PlayerListExpansion extends PlaceholderExpansion implements Configu
 		placeholders.addAll(lists.keySet().stream().map(listName->"%playerlist_"+listName+"_<list|amount|#>%").collect(Collectors.toList()));
 	}
 
-	public static PlayerListExpansion get() {
-		return instance;
-	}
+	@Override
+	public void stop() {}
 
 	@Override
 	public String getAuthor() {
