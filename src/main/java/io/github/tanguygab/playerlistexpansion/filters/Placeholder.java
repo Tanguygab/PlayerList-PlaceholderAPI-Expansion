@@ -13,7 +13,7 @@ public class Placeholder extends Filter {
     private final String rightside;
 
     public Placeholder(String arg) {
-        String[] sides = arg.split(Pattern.quote(PlayerListExpansion.get().argumentSeparator));
+        String[] sides = split(arg);
         leftside = sides[0];
         rightside = sides[1];
     }

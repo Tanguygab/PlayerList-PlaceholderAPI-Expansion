@@ -1,24 +1,22 @@
 package io.github.tanguygab.playerlistexpansion.filters;
 
-import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 
+import java.util.Arrays;
+import java.util.List;
 import java.util.stream.Stream;
 
 public class World extends Filter {
 
-    private final org.bukkit.World world;
+    private final List<String> worlds;
 
     public World(String arg) {
-        org.bukkit.World world;
-        try {world = Bukkit.getServer().getWorld(arg);}
-        catch (Exception e) {world = Bukkit.getServer().getWorlds().get(0);}
-        this.world = world;
+        worlds = Arrays.asList(split(arg));
     }
 
     @Override
     public Stream<OfflinePlayer> filter(Stream<OfflinePlayer> stream, OfflinePlayer viewer) {
-        return stream.filter(p->isOnline(p) && p.getPlayer().getWorld() == world);
+        return stream.filter(p->isOnline(p) && worlds.contains(p.getPlayer().getWorld().getName()));
     }
 
 }
