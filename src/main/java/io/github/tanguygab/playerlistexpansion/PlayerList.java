@@ -42,7 +42,7 @@ public class PlayerList {
         if (!included) list.remove(viewer);
         Stream<OfflinePlayer> stream = list.stream();
         for (Filter filter : filters) stream = filter.filter(stream,viewer);
-        return list;
+        return stream.collect(Collectors.toList());
     }
 
 }
