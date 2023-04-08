@@ -89,10 +89,11 @@ public class PlayerListExpansion extends PlaceholderExpansion implements Taskabl
 
 	@Override
 	public String onRequest(OfflinePlayer player, String identifier) {
-		String[] args = identifier.split("_");
-		String list = args[0];
-		String arg = args.length > 1 ? args[1] : "amount";
-		return lists.containsKey(list) ? lists.get(list).getText(player,arg) : null;
+		int _index = identifier.lastIndexOf('_');
+		if (_index == -1 || _index == identifier.length()-1) return null;
+		String list = identifier.substring(0,_index);
+		String output = identifier.substring(_index+1);
+		return lists.containsKey(list) ? lists.get(list).getText(player,output) : null;
 	}
 
 	@Override
