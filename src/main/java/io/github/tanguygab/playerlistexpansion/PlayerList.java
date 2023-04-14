@@ -25,16 +25,17 @@ public class PlayerList {
         list.forEach(p->sortedMap.put(p.getName(),p));
         list = new ArrayList<>(sortedMap.values());
 
-        switch (arg) {
-            case "list": return list.stream().map(OfflinePlayer::getName).collect(Collectors.joining(", "));
-            case "amount": return list.size()+"";
-            default: {
-                int pos;
-                try {pos = Integer.parseInt(arg);}
-                catch (Exception e) {return null;}
-                return pos >= 0 && pos < list.size() ? list.get(pos).getName() : PlayerListExpansion.get().offlineText;
-            }
+        if (arg.equals("amount")) return list.size()+"";
+
+        if (arg.startsWith("list")) {
+            String separator = arg.startsWith("list-") ? arg.substring(5) : ", ";
+            return list.stream().map(OfflinePlayer::getName).collect(Collectors.joining(separator));
         }
+
+        int pos;
+        try {pos = Integer.parseInt(arg);}
+        catch (Exception e) {return null;}
+        return pos >= 0 && pos < list.size() ? list.get(pos).getName() : PlayerListExpansion.get().offlineText;
     }
 
     private List<OfflinePlayer> getList(OfflinePlayer viewer) {
