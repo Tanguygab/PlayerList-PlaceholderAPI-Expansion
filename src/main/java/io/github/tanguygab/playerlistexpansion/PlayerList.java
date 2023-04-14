@@ -28,7 +28,7 @@ public class PlayerList {
         if (arg.equals("amount")) return list.size()+"";
 
         if (arg.startsWith("list")) {
-            String separator = arg.startsWith("list-") ? arg.substring(5) : ", ";
+            String separator = arg.startsWith("list-") ? arg.substring(5).replace("\\n","\n") : ", ";
             return list.stream().map(OfflinePlayer::getName).collect(Collectors.joining(separator));
         }
 
