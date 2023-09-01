@@ -23,7 +23,7 @@ public class PlayerListExpansion extends PlaceholderExpansion implements Taskabl
 	public String argumentSeparator;
 	private final static Map<String, Object> defaults = new LinkedHashMap<String,Object>() {{
 		put("offline-text","Offline");
-		put("argument-separator","||");
+		put("argument-separator",",");
 		Map<String,Object> staffList = new LinkedHashMap<String, Object>() {{
 			put("type","ONLINE");
 			put("included",true);
@@ -42,7 +42,7 @@ public class PlayerListExpansion extends PlaceholderExpansion implements Taskabl
 	@Override
 	public void start() {
 		offlineText = getString("offline-text","Offline");
-		argumentSeparator = getString("argument-separator","||");
+		argumentSeparator = getString("argument-separator",",");
 
 		ConfigurationSection config = getConfigSection("lists");
 		if (config == null) return;
@@ -56,15 +56,13 @@ public class PlayerListExpansion extends PlaceholderExpansion implements Taskabl
 
 			List<Filter> filters = new ArrayList<>();
 			cfg.getStringList("filters").forEach(filter -> {
-				String[] args = filter.split(":");
-				Filter f = Filter.find(args[0], args.length > 1 ? args[1] : null);
+				Filter f = Filter.find(filter);
 				if (f != null) filters.add(f);
 			});
 
 			List<SortingType> sortingTypes = new ArrayList<>();
 			cfg.getStringList("sorting-types").forEach(sortingType -> {
-				String[] args = sortingType.split(":");
-				SortingType s = SortingType.find(args[0], args.length > 1 ? args[1] : null);
+				SortingType s = SortingType.find(sortingType);
 				if (s != null) sortingTypes.add(s);
 			});
 

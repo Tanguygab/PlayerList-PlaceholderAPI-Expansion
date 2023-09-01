@@ -14,19 +14,22 @@ public abstract class Filter {
 
     @SuppressWarnings("all")
     private static final Map<String,Function<String,Filter>> filters = new HashMap<String,Function<String,Filter>>() {{
-        put("banned",arg->new Banned());
-        put("cansee",arg->new CanSee());
-        put("gamemode", GameMode::new);
-        put("nearby",Nearby::new);
-        put("permission",Permission::new);
-        put("placeholder",Placeholder::new);
+        put("BANNED",arg->new Banned());
+        put("CANSEE",arg->new CanSee());
+        put("GAMEMODE",GameMode::new);
+        put("NEARBY",Nearby::new);
+        put("PERMISSION",Permission::new);
+        put("PLACEHOLDER",Placeholder::new);
         if (Bukkit.getServer().getPluginManager().isPluginEnabled("ViaVersion"))
-            put("version",Version::new);
-        put("whitelisted",arg->new Whitelisted());
-        put("world",World::new);
+            put("VERSION",Version::new);
+        put("WHITELISTED",arg->new Whitelisted());
+        put("WORLD",World::new);
     }};
-    public static Filter find(String filter, String arg) {
-        return filters.containsKey(filter.toLowerCase()) ? filters.get(filter.toLowerCase()).apply(arg) : null;
+    public static Filter find(String string) {
+        String[] args = string.split(":");
+        String filter = args[0].toUpperCase();
+        String arg = args.length > 1 ? args[1] : null;
+        return filters.containsKey(filter) ? filters.get(filter).apply(arg) : null;
     }
 
     protected String[] split(String arg) {
