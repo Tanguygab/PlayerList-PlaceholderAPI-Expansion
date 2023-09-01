@@ -4,6 +4,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import io.github.tanguygab.playerlistexpansion.filters.Filter;
+import io.github.tanguygab.playerlistexpansion.sorting.SortingType;
 import me.clip.placeholderapi.expansion.Configurable;
 import me.clip.placeholderapi.expansion.Taskable;
 import org.bukkit.OfflinePlayer;
@@ -60,7 +61,14 @@ public class PlayerListExpansion extends PlaceholderExpansion implements Taskabl
 				if (f != null) filters.add(f);
 			});
 
-			lists.put(list, new PlayerList(list,type,filters,included));
+			List<SortingType> sortingTypes = new ArrayList<>();
+			cfg.getStringList("sorting-types").forEach(sortingType -> {
+				String[] args = sortingType.split(":");
+				SortingType s = SortingType.find(args[0], args.length > 1 ? args[1] : null);
+				if (s != null) sortingTypes.add(s);
+			});
+
+			lists.put(list, new PlayerList(list,type,filters,sortingTypes,included));
 		});
 		placeholders.addAll(lists.keySet().stream().map(listName->"%playerlist_"+listName+"_<list|amount|#>%").collect(Collectors.toList()));
 	}

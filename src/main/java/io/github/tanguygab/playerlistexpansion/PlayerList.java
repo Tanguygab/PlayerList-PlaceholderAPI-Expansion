@@ -1,6 +1,7 @@
 package io.github.tanguygab.playerlistexpansion;
 
 import io.github.tanguygab.playerlistexpansion.filters.Filter;
+import io.github.tanguygab.playerlistexpansion.sorting.SortingType;
 import me.clip.placeholderapi.PlaceholderAPI;
 import org.bukkit.OfflinePlayer;
 
@@ -12,12 +13,14 @@ public class PlayerList {
     private final String name;
     private final ListType type;
     private final List<Filter> filters;
+    private final List<SortingType> sortingTypes;
     private final boolean included;
 
-    public PlayerList(String name, ListType type, List<Filter> filters, boolean included) {
+    public PlayerList(String name, ListType type, List<Filter> filters, List<SortingType> sortingTypes, boolean included) {
         this.name = name;
         this.type = type;
         this.filters = filters;
+        this.sortingTypes = sortingTypes;
         this.included = included;
     }
 
@@ -46,11 +49,22 @@ public class PlayerList {
         } else list = type.getList().stream().map(OfflinePlayer::getName).collect(Collectors.toCollection(ArrayList::new));
 
         if (!included) list.remove(viewer.getName());
-        for (Filter filter : filters)
-            list.removeIf(name->!filter.filter(name,viewer));
 
-        if (type != ListType.CUSTOM) Collections.sort(list);
-        return list;
+        filters.forEach(filter -> list.removeIf(name -> !filter.filter(name,viewer)));
+
+        return sort(list,viewer);
+    }
+
+    private List<String> sort(List<String> list, OfflinePlayer viewer) {
+        if (sortingTypes.isEmpty()) return list;
+
+        Map<String,List<String>> sortedMap = new TreeMap<>();
+        list.forEach(name->{
+            StringBuilder sortingString = new StringBuilder();
+            sortingTypes.forEach(type -> sortingString.append(type.getSortingString(name,viewer)));
+            sortedMap.computeIfAbsent(sortingString.toString(),k->new ArrayList<>()).add(name);
+        });
+        return sortedMap.values().stream().flatMap(Collection::stream).collect(Collectors.toList());
     }
 
 }
