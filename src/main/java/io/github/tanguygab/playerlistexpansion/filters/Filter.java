@@ -39,7 +39,7 @@ public abstract class Filter {
         return null;
     }
     protected Player getOnline(String name) {
-        return Bukkit.getServer().getPlayer(name);
+        return Bukkit.getServer().getPlayerExact(name);
     }
 
     public abstract boolean filter(String name, OfflinePlayer viewer);
