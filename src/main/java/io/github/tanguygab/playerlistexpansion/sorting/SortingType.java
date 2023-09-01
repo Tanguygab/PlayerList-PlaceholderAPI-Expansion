@@ -21,12 +21,14 @@ public abstract class SortingType {
     }};
 
     public static SortingType find(String string) {
-        String[] args = string.split(":");
-        String type = args[0].toUpperCase();
-        String arg = args.length > 1 ? args[1] : null;
+        int index = string.indexOf(":");
+        String type = index == -1 ? string : string.substring(0,index);
         type = type.toUpperCase();
+        String arg = index == -1 ? null : string.substring(index+1);
         return types.containsKey(type) ? types.get(type).apply(arg) : null;
     }
+
+    protected final static int DEFAULT_NUMBER = Integer.MAX_VALUE /2;
 
     private final String placeholder;
 
@@ -35,7 +37,7 @@ public abstract class SortingType {
     }
 
     protected String parse(String name, OfflinePlayer viewer) {
-        if (placeholder == null) return name;
+        if (placeholder == null || placeholder.isEmpty()) return name;
         if (!placeholder.contains("%")) return placeholder;
 
         String output = placeholder;

@@ -11,7 +11,7 @@ public class LOW_TO_HIGH extends SortingType {
     @Override
     public String getSortingString(String name, OfflinePlayer viewer) {
         String string = parse(name,viewer);
-        double num = parseDouble(string); //in case it's not a number, it'll return 0. wait, but they'll show on top-
+        double num = DEFAULT_NUMBER + parseDouble(string);
         return String.valueOf(num);
     }
 }

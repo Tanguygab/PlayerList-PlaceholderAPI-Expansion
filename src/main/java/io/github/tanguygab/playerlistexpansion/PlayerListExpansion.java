@@ -1,6 +1,7 @@
 package io.github.tanguygab.playerlistexpansion;
 
 import java.util.*;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import io.github.tanguygab.playerlistexpansion.filters.Filter;
@@ -42,7 +43,7 @@ public class PlayerListExpansion extends PlaceholderExpansion implements Taskabl
 	@Override
 	public void start() {
 		offlineText = getString("offline-text","Offline");
-		argumentSeparator = getString("argument-separator",",");
+		argumentSeparator = Pattern.quote(getString("argument-separator", ","));
 
 		ConfigurationSection config = getConfigSection("lists");
 		if (config == null) return;

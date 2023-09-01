@@ -8,7 +8,6 @@ import org.bukkit.entity.Player;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
-import java.util.regex.Pattern;
 
 public abstract class Filter {
 
@@ -26,14 +25,15 @@ public abstract class Filter {
         put("WORLD",World::new);
     }};
     public static Filter find(String string) {
-        String[] args = string.split(":");
-        String filter = args[0].toUpperCase();
-        String arg = args.length > 1 ? args[1] : null;
+        int index = string.indexOf(":");
+        String filter = index == -1 ? string : string.substring(0,index);
+        filter = filter.toUpperCase();
+        String arg = index == -1 ? null : string.substring(index+1);
         return filters.containsKey(filter) ? filters.get(filter).apply(arg) : null;
     }
 
     protected String[] split(String arg) {
-        return arg.split(Pattern.quote(PlayerListExpansion.get().argumentSeparator));
+        return arg.split(PlayerListExpansion.get().argumentSeparator);
     }
 
     protected OfflinePlayer getOffline(String name) {

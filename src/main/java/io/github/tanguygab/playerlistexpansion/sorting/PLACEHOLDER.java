@@ -12,7 +12,7 @@ public class PLACEHOLDER extends SortingType {
     private final Map<String,Integer> sortingMap = new LinkedHashMap<>();
 
     public PLACEHOLDER(String arg) {
-        super(arg.substring(arg.indexOf(":")));
+        super(arg.substring(0,arg.indexOf(":")));
         arg = arg.substring(arg.indexOf(":")+1);
         if (arg.isEmpty()) {
             return;
@@ -28,6 +28,6 @@ public class PLACEHOLDER extends SortingType {
     public String getSortingString(String name, OfflinePlayer viewer) {
         String output = parse(name,viewer);
         int position = sortingMap.getOrDefault(output,sortingMap.size()+1);
-        return String.valueOf(position);
+        return String.valueOf((char) position);
     }
 }
