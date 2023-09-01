@@ -16,9 +16,11 @@ public enum ListType {
         List<OfflinePlayer> list = new ArrayList<>(Arrays.asList(Bukkit.getServer().getOfflinePlayers()));
         list.addAll(Bukkit.getServer().getOnlinePlayers());
         return list;
-    });
+    }),
+    CUSTOM;
 
-    final Callable<List<OfflinePlayer>> callable;
+    Callable<List<OfflinePlayer>> callable;
+    ListType() {}
     ListType(Callable<List<OfflinePlayer>> callable) {
         this.callable = callable;
     }

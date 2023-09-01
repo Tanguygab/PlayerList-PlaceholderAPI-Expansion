@@ -10,6 +10,7 @@ import org.bukkit.OfflinePlayer;
 
 import me.clip.placeholderapi.expansion.PlaceholderExpansion;
 import org.bukkit.configuration.ConfigurationSection;
+import org.jetbrains.annotations.NotNull;
 
 public class PlayerListExpansion extends PlaceholderExpansion implements Taskable, Configurable {
 
@@ -59,7 +60,7 @@ public class PlayerListExpansion extends PlaceholderExpansion implements Taskabl
 				if (f != null) filters.add(f);
 			});
 
-			lists.put(list, new PlayerList(type, filters, included));
+			lists.put(list, new PlayerList(list,type, filters, included));
 		});
 		placeholders.addAll(lists.keySet().stream().map(listName->"%playerlist_"+listName+"_<list|amount|#>%").collect(Collectors.toList()));
 	}
@@ -68,22 +69,22 @@ public class PlayerListExpansion extends PlaceholderExpansion implements Taskabl
 	public void stop() {}
 
 	@Override
-	public String getAuthor() {
+	public @NotNull String getAuthor() {
 		return "Tanguygab";
 	}
 
 	@Override
-	public String getIdentifier() {
+	public @NotNull String getIdentifier() {
 		return "playerlist";
 	}
 
 	@Override
-	public String getVersion() {
-		return "3.0.3";
+	public @NotNull String getVersion() {
+		return "3.0.4";
 	}
 
 	@Override
-	public List<String> getPlaceholders() {
+	public @NotNull List<String> getPlaceholders() {
 		return placeholders;
 	}
 
