@@ -60,7 +60,7 @@ public class PlayerListExpansion extends PlaceholderExpansion implements Taskabl
 				if (f != null) filters.add(f);
 			});
 
-			lists.put(list, new PlayerList(list,type, filters, included));
+			lists.put(list, new PlayerList(list,type,filters,included));
 		});
 		placeholders.addAll(lists.keySet().stream().map(listName->"%playerlist_"+listName+"_<list|amount|#>%").collect(Collectors.toList()));
 	}

@@ -1,8 +1,7 @@
 package io.github.tanguygab.playerlistexpansion.filters;
 
 import org.bukkit.OfflinePlayer;
-
-import java.util.stream.Stream;
+import org.bukkit.entity.Player;
 
 public class Nearby extends Filter {
 
@@ -12,14 +11,16 @@ public class Nearby extends Filter {
         double distance;
         try {distance = Double.parseDouble(arg);}
         catch (Exception e) {distance = 0;}
-        this.distance = Math.pow(distance, 2);
+        this.distance = distance;
     }
 
     @Override
-    public Stream<OfflinePlayer> filter(Stream<OfflinePlayer> stream, OfflinePlayer viewer) {
-        return stream.filter(p->isOnline(p,viewer)
-                && viewer.getPlayer().getWorld().equals(p.getPlayer().getWorld())
-                && viewer.getPlayer().getLocation().distanceSquared(p.getPlayer().getLocation()) < distance);
+    public boolean filter(String name, OfflinePlayer viewer) {
+        Player player = getOnline(name);
+        Player viewerPlayer = viewer.getPlayer();
+        return player != null
+                && viewerPlayer != null
+                && player.getWorld() == viewerPlayer.getWorld()
+                && viewerPlayer.getLocation().distance(player.getLocation()) < distance;
     }
-
 }

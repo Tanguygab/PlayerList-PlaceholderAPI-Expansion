@@ -1,10 +1,10 @@
 package io.github.tanguygab.playerlistexpansion.filters;
 
 import org.bukkit.OfflinePlayer;
+import org.bukkit.entity.Player;
 
 import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Stream;
 
 public class Permission extends Filter {
 
@@ -15,8 +15,8 @@ public class Permission extends Filter {
     }
 
     @Override
-    public Stream<OfflinePlayer> filter(Stream<OfflinePlayer> stream, OfflinePlayer viewer) {
-        return stream.filter(p->isOnline(p) && permissions.stream().anyMatch(perm->p.getPlayer().hasPermission(perm)));
+    public boolean filter(String name, OfflinePlayer viewer) {
+        Player player = getOnline(name);
+        return player != null && permissions.stream().anyMatch(player::hasPermission);
     }
-
 }

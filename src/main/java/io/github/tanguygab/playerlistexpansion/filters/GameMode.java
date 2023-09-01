@@ -1,8 +1,7 @@
 package io.github.tanguygab.playerlistexpansion.filters;
 
 import org.bukkit.OfflinePlayer;
-
-import java.util.stream.Stream;
+import org.bukkit.entity.Player;
 
 public class GameMode extends Filter {
 
@@ -16,8 +15,8 @@ public class GameMode extends Filter {
     }
 
     @Override
-    public Stream<OfflinePlayer> filter(Stream<OfflinePlayer> stream, OfflinePlayer viewer) {
-        return stream.filter(p->isOnline(p) && p.getPlayer().getGameMode() == mode);
+    public boolean filter(String name, OfflinePlayer viewer) {
+        Player player = getOnline(name);
+        return player != null && player.getGameMode() == mode;
     }
-
 }

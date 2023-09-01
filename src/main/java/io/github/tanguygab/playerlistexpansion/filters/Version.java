@@ -2,12 +2,12 @@ package io.github.tanguygab.playerlistexpansion.filters;
 
 import com.viaversion.viaversion.api.Via;
 import org.bukkit.OfflinePlayer;
+import org.bukkit.entity.Player;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Stream;
 
 public class Version extends Filter {
 
@@ -28,11 +28,10 @@ public class Version extends Filter {
     }
 
     @Override
-    public Stream<OfflinePlayer> filter(Stream<OfflinePlayer> stream, OfflinePlayer viewer) {
-        return stream.filter(p->{
-            int version = Via.getAPI().getPlayerVersion(p.getUniqueId());
-            return isOnline(p) && (versions.contains(version) || ranges.keySet().stream().anyMatch(ver->version >= ver && version <= ranges.get(ver)));
-        });
+    public boolean filter(String name, OfflinePlayer viewer) {
+        Player player = getOnline(name);
+        if (player == null) return false;
+        int version = Via.getAPI().getPlayerVersion(player.getUniqueId());
+        return versions.contains(version) || ranges.keySet().stream().anyMatch(ver->version >= ver && version <= ranges.get(ver));
     }
-
 }

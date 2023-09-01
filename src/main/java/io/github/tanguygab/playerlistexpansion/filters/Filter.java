@@ -3,11 +3,12 @@ package io.github.tanguygab.playerlistexpansion.filters;
 import io.github.tanguygab.playerlistexpansion.PlayerListExpansion;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
+import org.bukkit.entity.Player;
+
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.regex.Pattern;
-import java.util.stream.Stream;
 
 public abstract class Filter {
 
@@ -27,16 +28,20 @@ public abstract class Filter {
         return filters.containsKey(filter.toLowerCase()) ? filters.get(filter.toLowerCase()).apply(arg) : null;
     }
 
-    protected boolean isOnline(OfflinePlayer... players) {
-        for (OfflinePlayer p : players)
-            if (p.getPlayer() == null)
-                return false;
-        return true;
-    }
     protected String[] split(String arg) {
         return arg.split(Pattern.quote(PlayerListExpansion.get().argumentSeparator));
     }
 
-    public abstract Stream<OfflinePlayer> filter(Stream<OfflinePlayer> stream, OfflinePlayer viewer);
+    protected OfflinePlayer getOffline(String name) {
+        for (OfflinePlayer player : Bukkit.getServer().getOfflinePlayers())
+            if (name.equals(player.getName()))
+                return player;
+        return null;
+    }
+    protected Player getOnline(String name) {
+        return Bukkit.getServer().getPlayer(name);
+    }
+
+    public abstract boolean filter(String name, OfflinePlayer viewer);
 
 }

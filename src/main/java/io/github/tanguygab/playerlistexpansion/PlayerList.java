@@ -6,14 +6,13 @@ import org.bukkit.OfflinePlayer;
 
 import java.util.*;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 public class PlayerList {
 
     private final String name;
     private final ListType type;
     private final List<Filter> filters;
-    private final Boolean included;
+    private final boolean included;
 
     public PlayerList(String name, ListType type, List<Filter> filters, boolean included) {
         this.name = name;
@@ -39,28 +38,19 @@ public class PlayerList {
     }
 
     private List<String> getList(OfflinePlayer viewer) {
+        List<String> list;
         if (type == ListType.CUSTOM) {
             String input = PlaceholderAPI.setPlaceholders(viewer,PlayerListExpansion.get().getString("lists."+name+".input",""));
             String separator = PlayerListExpansion.get().getString("lists."+name+".separator",",");
-            List<String> list = Arrays.asList(input.split(separator));
-            if (!included) {
-                list = new ArrayList<>(list);
-                list.remove(viewer.getName());
-            }
-            return list;
-        }
+            list = new ArrayList<>(Arrays.asList(input.split(separator)));
+        } else list = type.getList().stream().map(OfflinePlayer::getName).collect(Collectors.toCollection(ArrayList::new));
 
-        List<OfflinePlayer> list = type.getList();
-        if (!included) list.remove(viewer);
-        Stream<OfflinePlayer> stream = list.stream();
-        for (Filter filter : filters) stream = filter.filter(stream,viewer);
+        if (!included) list.remove(viewer.getName());
+        for (Filter filter : filters)
+            list.removeIf(name->!filter.filter(name,viewer));
 
-        Map<String,OfflinePlayer> sortedMap = new TreeMap<>();
-        stream.forEach(p->sortedMap.put(p.getName(),p));
-        return sortedMap.values()
-                .stream()
-                .map(OfflinePlayer::getName)
-                .collect(Collectors.toList());
+        if (type != ListType.CUSTOM) Collections.sort(list);
+        return list;
     }
 
 }

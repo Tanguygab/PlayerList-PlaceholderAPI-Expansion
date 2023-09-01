@@ -1,26 +1,21 @@
 package io.github.tanguygab.playerlistexpansion.filters;
 
-import io.github.tanguygab.playerlistexpansion.PlayerListExpansion;
 import me.clip.placeholderapi.PlaceholderAPI;
 import org.bukkit.OfflinePlayer;
 
-import java.util.regex.Pattern;
-import java.util.stream.Stream;
-
 public class Placeholder extends Filter {
 
-    private final String leftside;
-    private final String rightside;
+    private final String leftSide;
+    private final String rightSide;
 
     public Placeholder(String arg) {
         String[] sides = split(arg);
-        leftside = sides[0];
-        rightside = sides[1];
+        leftSide = sides[0];
+        rightSide = sides[1];
     }
 
     @Override
-    public Stream<OfflinePlayer> filter(Stream<OfflinePlayer> stream, OfflinePlayer viewer) {
-        return stream.filter(p->PlaceholderAPI.setPlaceholders(p,leftside).equals(PlaceholderAPI.setPlaceholders(viewer,rightside)));
+    public boolean filter(String name, OfflinePlayer viewer) {
+        return PlaceholderAPI.setPlaceholders(getOffline(name), leftSide).equals(PlaceholderAPI.setPlaceholders(viewer, rightSide));
     }
-
 }

@@ -1,14 +1,15 @@
 package io.github.tanguygab.playerlistexpansion.filters;
 
 import org.bukkit.OfflinePlayer;
-
-import java.util.stream.Stream;
+import org.bukkit.entity.Player;
 
 public class CanSee extends Filter {
 
     @Override
-    public Stream<OfflinePlayer> filter(Stream<OfflinePlayer> stream, OfflinePlayer viewer) {
-        return stream.filter(p->isOnline(p,viewer) && viewer.getPlayer().canSee(p.getPlayer()));
+    public boolean filter(String name, OfflinePlayer viewer) {
+        Player player = getOnline(name);
+        Player viewerPlayer = viewer.getPlayer();
+        return player != null && viewerPlayer != null && viewerPlayer.canSee(player);
     }
 
 }
