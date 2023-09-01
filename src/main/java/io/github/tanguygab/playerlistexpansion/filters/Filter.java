@@ -12,6 +12,7 @@ import java.util.regex.Pattern;
 
 public abstract class Filter {
 
+    @SuppressWarnings("all")
     private static final Map<String,Function<String,Filter>> filters = new HashMap<String,Function<String,Filter>>() {{
         put("banned",arg->new Banned());
         put("cansee",arg->new CanSee());
