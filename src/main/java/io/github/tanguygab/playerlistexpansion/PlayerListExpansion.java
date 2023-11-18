@@ -87,7 +87,7 @@ public class PlayerListExpansion extends PlaceholderExpansion implements Taskabl
 
 	@Override
 	public @NotNull String getVersion() {
-		return "3.0.5";
+		return "3.0.6";
 	}
 
 	@Override
