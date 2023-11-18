@@ -44,8 +44,11 @@ public class PlayerList {
         List<String> list;
         if (type == ListType.CUSTOM) {
             String input = PlaceholderAPI.setPlaceholders(viewer,PlayerListExpansion.get().getString("lists."+name+".input",""));
-            String separator = PlayerListExpansion.get().getString("lists."+name+".separator",",");
-            list = new ArrayList<>(Arrays.asList(input.split(separator)));
+            if (input.isEmpty()) list = new ArrayList<>();
+            else {
+                String separator = PlayerListExpansion.get().getString("lists." + name + ".separator", ",");
+                list = new ArrayList<>(Arrays.asList(input.split(separator)));
+            }
         } else list = type.getList().stream().map(OfflinePlayer::getName).collect(Collectors.toCollection(ArrayList::new));
 
         if (!included) list.remove(viewer.getName());
