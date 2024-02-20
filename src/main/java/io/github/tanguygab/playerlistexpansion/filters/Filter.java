@@ -11,6 +11,8 @@ import java.util.function.Function;
 
 public abstract class Filter {
 
+    private boolean inverted = false;
+
     @SuppressWarnings("all")
     private static final Map<String,Function<String,Filter>> filters = new HashMap<String,Function<String,Filter>>() {{
         put("BANNED",arg->new Banned());
@@ -29,7 +31,20 @@ public abstract class Filter {
         String filter = index == -1 ? string : string.substring(0,index);
         filter = filter.toUpperCase();
         String arg = index == -1 ? null : string.substring(index+1);
-        return filters.containsKey(filter) ? filters.get(filter).apply(arg) : null;
+
+        boolean inverted = filter.charAt(0) == '!';
+        if (inverted) filter = filter.substring(1);
+
+        if (filters.containsKey(filter)) {
+            Filter f = filters.get(filter).apply(arg);
+            f.inverted = inverted;
+            return f;
+        }
+        return null;
+    }
+
+    public boolean isInverted() {
+        return inverted;
     }
 
     protected String[] split(String arg) {

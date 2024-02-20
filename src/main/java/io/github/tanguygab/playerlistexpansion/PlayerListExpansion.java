@@ -54,6 +54,7 @@ public class PlayerListExpansion extends PlaceholderExpansion implements Taskabl
 			if (type == null) return;
 
 			boolean included = cfg.getBoolean("included", true);
+			boolean duplicates = cfg.getBoolean("duplicates", true);
 
 			List<Filter> filters = new ArrayList<>();
 			cfg.getStringList("filters").forEach(filter -> {
@@ -67,7 +68,7 @@ public class PlayerListExpansion extends PlaceholderExpansion implements Taskabl
 				if (s != null) sortingTypes.add(s);
 			});
 
-			lists.put(list, new PlayerList(list,type,filters,sortingTypes,included));
+			lists.put(list, new PlayerList(list,type,filters,sortingTypes,included,duplicates));
 		});
 		placeholders.addAll(lists.keySet().stream().map(listName->"%playerlist_"+listName+"_<list|amount|#>%").collect(Collectors.toList()));
 	}
@@ -87,7 +88,7 @@ public class PlayerListExpansion extends PlaceholderExpansion implements Taskabl
 
 	@Override
 	public @NotNull String getVersion() {
-		return "3.0.6";
+		return "3.0.7";
 	}
 
 	@Override

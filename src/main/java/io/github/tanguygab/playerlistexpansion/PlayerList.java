@@ -15,13 +15,15 @@ public class PlayerList {
     private final List<Filter> filters;
     private final List<SortingType> sortingTypes;
     private final boolean included;
+    private final boolean duplicates;
 
-    public PlayerList(String name, ListType type, List<Filter> filters, List<SortingType> sortingTypes, boolean included) {
+    public PlayerList(String name, ListType type, List<Filter> filters, List<SortingType> sortingTypes, boolean included, boolean duplicates) {
         this.name = name;
         this.type = type;
         this.filters = filters;
         this.sortingTypes = sortingTypes;
         this.included = included;
+        this.duplicates = duplicates;
     }
 
     public String getText(OfflinePlayer viewer, String arg) {
@@ -52,8 +54,13 @@ public class PlayerList {
         } else list = type.getList().stream().map(OfflinePlayer::getName).collect(Collectors.toCollection(ArrayList::new));
 
         if (!included) list.remove(viewer.getName());
+        if (!duplicates) {
+            Set<String> set = new LinkedHashSet<>(list);
+            list.clear();
+            list.addAll(set);
+        }
 
-        filters.forEach(filter -> list.removeIf(name -> !filter.filter(name,viewer)));
+        filters.forEach(filter -> list.removeIf(name -> filter.isInverted() == filter.filter(name,viewer)));
 
         return sort(list,viewer);
     }
