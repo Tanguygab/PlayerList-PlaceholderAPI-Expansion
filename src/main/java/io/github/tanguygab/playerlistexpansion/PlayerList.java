@@ -42,7 +42,7 @@ public class PlayerList {
         return pos >= 0 && pos < names.size() ? names.get(pos) : PlayerListExpansion.get().offlineText;
     }
 
-    private List<String> getList(OfflinePlayer viewer) {
+    public List<String> getList(OfflinePlayer viewer) {
         List<String> list;
         if (type == ListType.CUSTOM) {
             String input = PlaceholderAPI.setPlaceholders(viewer,PlayerListExpansion.get().getString("lists."+name+".input",""));
