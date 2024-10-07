@@ -29,12 +29,39 @@ public class PlayerListExpansion extends PlaceholderExpansion implements Taskabl
 	private final static Map<String, Object> defaults = new LinkedHashMap<String,Object>() {{
 		put("offline-text","Offline");
 		put("argument-separator",",");
-		Map<String,Object> staffList = new LinkedHashMap<String, Object>() {{
-			put("type","ONLINE");
-			put("included",true);
-			put("filters",Arrays.asList("PERMISSION:group.staff","CANSEE"));
-		}};
-		put("lists",new HashMap<String, Map<String,Object>>() {{put("staff",staffList);}});
+		put("lists",new HashMap<String, Map<String,Object>>() {{
+			Map<String,Object> staffList = new LinkedHashMap<String, Object>() {{
+				put("type","ONLINE");
+				put("included",true);
+				put("filters",Arrays.asList("PERMISSION:group.staff","CANSEE"));
+			}};
+			put("staff",staffList);
+			Map<String,Object> playersList = new LinkedHashMap<String, Object>() {{
+				put("type","ONLINE");
+				put("included",true);
+				put("filters",Arrays.asList("!PERMISSION:group.staff","CANSEE"));
+			}};
+			put("players",playersList);
+		}});
+		put("groups", new HashMap<String, Map<String,Object>>() {{
+			Map<String,Object> playerlistGroup = new LinkedHashMap<String, Object>() {{
+				put("gap",1);
+				Map<String,Object> lists = new LinkedHashMap<String, Object>() {{
+					Map<String,Object> staffList = new LinkedHashMap<String, Object>() {{
+						put("title","Staff Members (%amount%)");
+						put("max",10);
+						put("remaining","... and %remaining% more!");
+					}};
+					put("staff",staffList);
+					Map<String,Object> playersList = new LinkedHashMap<String, Object>() {{
+						put("title","Players (%amount%)");
+					}};
+					put("players",playersList);
+				}};
+				put("lists", lists);
+			}};
+			put("staffAndPlayers",playerlistGroup);
+		}});
 	}};
 
 	public PlayerListExpansion() {
