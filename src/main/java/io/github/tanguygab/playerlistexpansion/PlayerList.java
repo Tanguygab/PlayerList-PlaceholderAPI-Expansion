@@ -16,6 +16,7 @@ public class PlayerList {
     private final List<SortingType> sortingTypes;
     private final boolean included;
     private final boolean duplicates;
+    private final Map<OfflinePlayer, CachedList> lastUpdate = new WeakHashMap<>();
 
     public PlayerList(String name, ListType type, List<Filter> filters, List<SortingType> sortingTypes, boolean included, boolean duplicates) {
         this.name = name;
@@ -27,7 +28,7 @@ public class PlayerList {
     }
 
     public String getText(OfflinePlayer viewer, String arg) {
-        List<String> names = getList(viewer);
+        List<String> names = lastUpdate.computeIfAbsent(viewer, k -> new CachedList(this::getList)).getList(viewer);
 
         if (arg.equals("amount")) return names.size()+"";
 

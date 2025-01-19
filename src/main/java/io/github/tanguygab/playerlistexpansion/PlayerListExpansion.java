@@ -24,11 +24,13 @@ public class PlayerListExpansion extends PlaceholderExpansion implements Taskabl
 	private final Map<String, ListGroup> listGroups = new HashMap<>();
 	private final List<String> placeholders = new ArrayList<>();
 
+	public int updateCooldown;
 	public String offlineText;
 	public String argumentSeparator;
 	private final static Map<String, Object> defaults = new LinkedHashMap<String,Object>() {{
-		put("offline-text","Offline");
-		put("argument-separator",",");
+		put("update-cooldown", 1000);
+		put("offline-text", "Offline");
+		put("argument-separator", ",");
 		put("lists",new HashMap<String, Map<String,Object>>() {{
 			Map<String,Object> staffList = new LinkedHashMap<String, Object>() {{
 				put("type","ONLINE");
@@ -83,7 +85,7 @@ public class PlayerListExpansion extends PlaceholderExpansion implements Taskabl
 
 	@Override
 	public @NotNull String getVersion() {
-		return "3.0.8";
+		return "3.0.9";
 	}
 
 	@Override
@@ -93,6 +95,7 @@ public class PlayerListExpansion extends PlaceholderExpansion implements Taskabl
 
 	@Override
 	public void start() {
+		updateCooldown = getInt("update-cooldown",1000);
 		offlineText = getString("offline-text","Offline");
 		argumentSeparator = Pattern.quote(getString("argument-separator", ","));
 
@@ -188,10 +191,12 @@ public class PlayerListExpansion extends PlaceholderExpansion implements Taskabl
 
 		if (list.startsWith("group_")) {
 			String group = list.substring(6);
-			return listGroups.containsKey(group) ? listGroups.get(group).getText(player,output) : null;
+			ListGroup groupedList = listGroups.get(group);
+			return groupedList != null ? groupedList.getText(player,output) : null;
 		}
 
-		return lists.containsKey(list) ? lists.get(list).getText(player,output) : null;
+		PlayerList playerList = lists.get(list);
+		return playerList != null ? playerList.getText(player,output) : null;
 	}
 
 	@Override
