@@ -17,7 +17,6 @@ public class CachedList {
 
     public List<String> getList(OfflinePlayer player) {
         long now = System.currentTimeMillis();
-        System.out.println(now - lastUpdate > PlayerListExpansion.get().updateCooldown);
         if (now - lastUpdate > PlayerListExpansion.get().updateCooldown) {
             list = fun.apply(player);
             lastUpdate = now;
