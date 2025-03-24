@@ -1,5 +1,6 @@
 package io.github.tanguygab.playerlistexpansion.groups;
 
+import io.github.tanguygab.playerlistexpansion.PlayerListExpansion;
 import me.clip.placeholderapi.PlaceholderAPI;
 import org.bukkit.OfflinePlayer;
 
@@ -17,8 +18,12 @@ public class ListGroup {
         this.gap = gap;
     }
 
-    public String getText(OfflinePlayer viewer, String arg) {
-        List<String> slots = getList(viewer, !arg.equals("amount"));
+    public String getText(OfflinePlayer viewer, String arguments) {
+        String[] args = arguments.split("_");
+        String format = PlayerListExpansion.get().getFormat(arguments, args);
+        String arg = args[0];
+
+        List<String> slots = getList(viewer, arg.equals("amount"), format);
 
         if (arg.equals("amount")) return slots.size()+"";
 
@@ -28,15 +33,19 @@ public class ListGroup {
         return pos >= 0 && pos < slots.size() ? slots.get(pos) : "";
     }
 
-    private List<String> getList(OfflinePlayer viewer, boolean gap) {
+    private List<String> getList(OfflinePlayer viewer, boolean amount, String format) {
         List<String> slots = new ArrayList<>();
 
         for (GroupedList list : lists) {
-            List<String> players = list.getList().getList(viewer);
+            List<String> players = list.getList().getList(viewer, format);
             if (players.isEmpty()) continue;
+            if (amount) {
+                slots.addAll(players);
+                continue;
+            }
 
-            if (lists.indexOf(list) != 0 && gap && this.gap != 0) {
-                slots.addAll(Collections.nCopies(this.gap,""));
+            if (lists.indexOf(list) != 0 && gap != 0) {
+                slots.addAll(Collections.nCopies(gap,""));
             }
 
             slots.add(setPlaceholders(viewer, list.getTitle(), "%amount%",players.size()));

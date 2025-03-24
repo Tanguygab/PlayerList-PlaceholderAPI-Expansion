@@ -3,10 +3,12 @@ package io.github.tanguygab.playerlistexpansion;
 import io.github.tanguygab.playerlistexpansion.filters.Filter;
 import io.github.tanguygab.playerlistexpansion.sorting.SortingType;
 import me.clip.placeholderapi.PlaceholderAPI;
+import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class PlayerList {
 
@@ -27,8 +29,12 @@ public class PlayerList {
         this.duplicates = duplicates;
     }
 
-    public String getText(OfflinePlayer viewer, String arg) {
-        List<String> names = lastUpdate.computeIfAbsent(viewer, k -> new CachedList(this::getList)).getList(viewer);
+    public String getText(OfflinePlayer viewer, String arguments) {
+        String[] args = arguments.split("_");
+        String format = PlayerListExpansion.get().getFormat(arguments, args);
+        String arg = args[0];
+
+        List<String> names = lastUpdate.computeIfAbsent(viewer, k -> new CachedList(this::getList)).getList(viewer, format);
 
         if (arg.equals("amount")) return names.size()+"";
 
@@ -43,27 +49,39 @@ public class PlayerList {
         return pos >= 0 && pos < names.size() ? names.get(pos) : PlayerListExpansion.get().offlineText;
     }
 
-    public List<String> getList(OfflinePlayer viewer) {
-        List<String> list;
+    public List<String> getList(OfflinePlayer viewer, String format) {
+        Stream<String> stream;
         if (type == ListType.CUSTOM) {
             String input = PlaceholderAPI.setPlaceholders(viewer,PlayerListExpansion.get().getString("lists."+name+".input",""));
-            if (input.isEmpty()) list = new ArrayList<>();
+            if (input.isEmpty()) stream = Stream.of();
             else {
                 String separator = PlayerListExpansion.get().getString("lists." + name + ".separator", ",");
-                list = new ArrayList<>(Arrays.asList(input.split(separator)));
+                stream = Stream.of(input.split(separator));
             }
-        } else list = type.getList().stream().map(OfflinePlayer::getName).collect(Collectors.toCollection(ArrayList::new));
+        } else stream = type.getList()
+                .stream()
+                .map(OfflinePlayer::getName);
 
-        if (!included) list.remove(viewer.getName());
-        if (!duplicates) {
-            Set<String> set = new LinkedHashSet<>(list);
-            list.clear();
-            list.addAll(set);
-        }
+        stream = filter(viewer, format, stream);
 
-        filters.forEach(filter -> list.removeIf(name -> filter.isInverted() == filter.filter(name,viewer)));
+        return sort(stream.collect(Collectors.toList()), viewer);
+    }
 
-        return sort(list,viewer);
+    private Stream<String> filter(OfflinePlayer viewer, String format, Stream<String> stream) {
+        if (!included) stream = stream.filter(name -> !name.equals(viewer.getName()));
+        if (!duplicates) stream = stream.distinct();
+
+        stream = stream.filter(name -> filters
+                .stream()
+                .noneMatch(filter -> filter.isInverted() == filter.filter(name,viewer)));
+
+        stream = stream.map(name -> {
+            OfflinePlayer player = Bukkit.getOfflinePlayer(name);
+            if (!player.hasPlayedBefore() && !player.isOnline()) return name;
+            return PlaceholderAPI.setBracketPlaceholders(player, format);
+        });
+
+        return stream;
     }
 
     private List<String> sort(List<String> list, OfflinePlayer viewer) {

@@ -2,6 +2,7 @@ package io.github.tanguygab.playerlistexpansion;
 
 import java.util.*;
 import java.util.logging.Level;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
@@ -18,6 +19,8 @@ import org.bukkit.configuration.ConfigurationSection;
 import org.jetbrains.annotations.NotNull;
 
 public class PlayerListExpansion extends PlaceholderExpansion implements Taskable, Configurable {
+
+	private static final Pattern FORMAT_PATTERN = Pattern.compile("_format:");
 
 	private static PlayerListExpansion instance;
 	private final Map<String, PlayerList> lists = new HashMap<>();
@@ -183,11 +186,15 @@ public class PlayerListExpansion extends PlaceholderExpansion implements Taskabl
 	public void stop() {}
 
 	@Override
-	public String onRequest(OfflinePlayer player, String identifier) {
-		int _index = identifier.lastIndexOf('_');
-		if (_index == -1 || _index == identifier.length()-1) return null;
-		String list = identifier.substring(0,_index);
-		String output = identifier.substring(_index+1);
+	public String onRequest(OfflinePlayer player, @NotNull String params) {
+		Matcher matcher = FORMAT_PATTERN.matcher(params);
+		String _params = matcher.find() ? params.substring(0, matcher.start()) : params;
+
+		int _index = _params.lastIndexOf('_');
+		if (_index == -1 || _index == params.length()-1) return null;
+
+		String list = params.substring(0,_index);
+		String output = params.substring(_index+1);
 
 		if (list.startsWith("group_")) {
 			String group = list.substring(6);
@@ -203,4 +210,11 @@ public class PlayerListExpansion extends PlaceholderExpansion implements Taskabl
 	public Map<String, Object> getDefaults() {
 		return defaults;
 	}
+
+	public String getFormat(String arg, String[] args) {
+		if (args.length < 2) return "{player_name}";
+		String argument = arg.substring(args[0].length()+1);
+		return argument.startsWith("format:") ? argument.substring(7) : "{player_name}";
+	}
+
 }
