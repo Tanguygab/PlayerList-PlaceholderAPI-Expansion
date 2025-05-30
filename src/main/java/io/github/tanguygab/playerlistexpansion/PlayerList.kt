@@ -1,99 +1,111 @@
-package io.github.tanguygab.playerlistexpansion;
+package io.github.tanguygab.playerlistexpansion
 
-import io.github.tanguygab.playerlistexpansion.filters.Filter;
-import io.github.tanguygab.playerlistexpansion.sorting.SortingType;
-import me.clip.placeholderapi.PlaceholderAPI;
-import org.bukkit.Bukkit;
-import org.bukkit.OfflinePlayer;
+import io.github.tanguygab.playerlistexpansion.filters.Filter
+import io.github.tanguygab.playerlistexpansion.sorting.SortingType
+import me.clip.placeholderapi.PlaceholderAPI
+import org.bukkit.Bukkit
+import org.bukkit.OfflinePlayer
+import java.util.TreeMap
+import java.util.WeakHashMap
+import java.util.stream.Collectors
+import java.util.stream.Stream
+import kotlin.Boolean
 
-import java.util.*;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
+class PlayerList(
+    private val name: String,
+    private val type: ListType,
+    private val filters: List<Filter>,
+    private val sortingTypes: List<SortingType>,
+    private val included: Boolean,
+    private val duplicates: Boolean
+) {
+    private val lastUpdate = WeakHashMap<OfflinePlayer, CachedList>()
 
-public class PlayerList {
+    fun getText(viewer: OfflinePlayer?, arguments: String): String? {
+        val args = arguments.split("_")
+        val format = PlayerListExpansion.get().getFormat(arguments, args)
+        val arg = args[0]
 
-    private final String name;
-    private final ListType type;
-    private final List<Filter> filters;
-    private final List<SortingType> sortingTypes;
-    private final boolean included;
-    private final boolean duplicates;
-    private final Map<OfflinePlayer, CachedList> lastUpdate = new WeakHashMap<>();
+        val names = lastUpdate.computeIfAbsent(viewer) { k: OfflinePlayer? ->
+            CachedList { viewer: OfflinePlayer?, format: String ->
+                getList(
+                    viewer,
+                    format
+                )
+            }
+        }!!.getList(viewer, format)
 
-    public PlayerList(String name, ListType type, List<Filter> filters, List<SortingType> sortingTypes, boolean included, boolean duplicates) {
-        this.name = name;
-        this.type = type;
-        this.filters = filters;
-        this.sortingTypes = sortingTypes;
-        this.included = included;
-        this.duplicates = duplicates;
+        val pos = arg.toIntOrNull()
+        return when {
+            arg == "amount" -> names.size.toString()
+            arg.startsWith("list") -> {
+                val separator = if (arg.startsWith("list-")) arg.substring(5).replace("\\n", "\n") else ", "
+                return names.joinToString(separator)
+            }
+            pos === null -> null
+            pos >= 0 && pos < names.size -> names[pos]
+            else -> PlayerListExpansion.get().offlineText
+        }
     }
 
-    public String getText(OfflinePlayer viewer, String arguments) {
-        String[] args = arguments.split("_");
-        String format = PlayerListExpansion.get().getFormat(arguments, args);
-        String arg = args[0];
+    fun getList(viewer: OfflinePlayer?, format: String): List<String> {
+        var stream: Stream<String>
+        if (type == ListType.CUSTOM) {
+            val input: String = PlaceholderAPI.setPlaceholders(
+                viewer,
+                PlayerListExpansion.get().getString("lists.$name.input", "")!!
+            )
+            if (input.isEmpty()) stream = Stream.of()
+            else {
+                val separator = PlayerListExpansion.get().getString("lists.$name.separator", ",")!!
+                stream = input.split(separator).stream()
+            }
+        } else stream = type
+            .getList()
+            .stream()
+            .map { obj: OfflinePlayer? -> obj?.name }
 
-        List<String> names = lastUpdate.computeIfAbsent(viewer, k -> new CachedList(this::getList)).getList(viewer, format);
+        stream = filter(viewer, format, stream)
 
-        if (arg.equals("amount")) return names.size()+"";
+        return sort(stream.collect(Collectors.toList()), viewer)
+    }
 
-        if (arg.startsWith("list")) {
-            String separator = arg.startsWith("list-") ? arg.substring(5).replace("\\n","\n") : ", ";
-            return String.join(separator,names);
+    private fun filter(
+        viewer: OfflinePlayer?,
+        format: String,
+        stream: Stream<String>
+    ): Stream<String> {
+        var stream = stream
+        if (!included) stream = stream.filter { it != viewer?.name }
+        if (!duplicates) stream = stream.distinct()
+
+        stream = stream.filter { name: String ->
+            filters
+                .stream()
+                .noneMatch { it.isInverted == it.filter(name, viewer) }
         }
 
-        int pos;
-        try {pos = Integer.parseInt(arg);}
-        catch (Exception e) {return null;}
-        return pos >= 0 && pos < names.size() ? names.get(pos) : PlayerListExpansion.get().offlineText;
+        stream = stream.map {
+            val player = Bukkit.getOfflinePlayerIfCached(it)
+            if (player === null || (!player.hasPlayedBefore() && !player.isOnline)) return@map it
+            PlaceholderAPI.setBracketPlaceholders(player, format)
+        }
+
+        return stream
     }
 
-    public List<String> getList(OfflinePlayer viewer, String format) {
-        Stream<String> stream;
-        if (type == ListType.CUSTOM) {
-            String input = PlaceholderAPI.setPlaceholders(viewer,PlayerListExpansion.get().getString("lists."+name+".input",""));
-            if (input.isEmpty()) stream = Stream.of();
-            else {
-                String separator = PlayerListExpansion.get().getString("lists." + name + ".separator", ",");
-                stream = Stream.of(input.split(separator));
-            }
-        } else stream = type.getList()
-                .stream()
-                .map(OfflinePlayer::getName);
+    private fun sort(list: List<String>, viewer: OfflinePlayer?): List<String> {
+        if (sortingTypes.isEmpty()) return list
 
-        stream = filter(viewer, format, stream);
-
-        return sort(stream.collect(Collectors.toList()), viewer);
+        val sortedMap = TreeMap<String, ArrayList<String>>()
+        list.forEach { name: String ->
+            val sortingString = StringBuilder()
+            sortingTypes.forEach { sortingString.append(it.getSortingString(name, viewer)) }
+            sortedMap.computeIfAbsent(sortingString.toString()) { k: String -> ArrayList() }.add(name)
+        }
+        return sortedMap.values
+            .stream()
+            .flatMap { obj: List<String> -> obj.stream() }
+            .collect(Collectors.toList())
     }
-
-    private Stream<String> filter(OfflinePlayer viewer, String format, Stream<String> stream) {
-        if (!included) stream = stream.filter(name -> !name.equals(viewer.getName()));
-        if (!duplicates) stream = stream.distinct();
-
-        stream = stream.filter(name -> filters
-                .stream()
-                .noneMatch(filter -> filter.isInverted() == filter.filter(name,viewer)));
-
-        stream = stream.map(name -> {
-            OfflinePlayer player = Bukkit.getOfflinePlayer(name);
-            if (!player.hasPlayedBefore() && !player.isOnline()) return name;
-            return PlaceholderAPI.setBracketPlaceholders(player, format);
-        });
-
-        return stream;
-    }
-
-    private List<String> sort(List<String> list, OfflinePlayer viewer) {
-        if (sortingTypes.isEmpty()) return list;
-
-        Map<String,List<String>> sortedMap = new TreeMap<>();
-        list.forEach(name->{
-            StringBuilder sortingString = new StringBuilder();
-            sortingTypes.forEach(type -> sortingString.append(type.getSortingString(name,viewer)));
-            sortedMap.computeIfAbsent(sortingString.toString(),k->new ArrayList<>()).add(name);
-        });
-        return sortedMap.values().stream().flatMap(Collection::stream).collect(Collectors.toList());
-    }
-
 }

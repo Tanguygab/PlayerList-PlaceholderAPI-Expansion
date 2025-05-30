@@ -1,21 +1,15 @@
-package io.github.tanguygab.playerlistexpansion.sorting;
+package io.github.tanguygab.playerlistexpansion.sorting
 
-import org.bukkit.OfflinePlayer;
+import org.bukkit.OfflinePlayer
 
-public class Z_TO_A extends SortingType {
-
-    public Z_TO_A(String arg) {
-        super(arg);
-    }
-
-    @Override
-    public String getSortingString(String name, OfflinePlayer viewer) {
-        char[] chars = parse(name,viewer).toCharArray();
-        for (int i=0; i<chars.length; i++) {
-            char c = chars[i];
-            if (c >= 65 && c <= 90) chars[i] = (char) (155 - c);
-            if (c >= 97 && c <= 122) chars[i] = (char) (219 - c);
+class Z_TO_A(arg: String?) : SortingType(arg) {
+    override fun getSortingString(name: String, viewer: OfflinePlayer?): String {
+        val chars = parse(name, viewer).toCharArray()
+        for (i in chars.indices) {
+            val c = chars[i]
+            if (c.code >= 65 && c.code <= 90) chars[i] = (155 - c.code).toChar()
+            if (c.code >= 97 && c.code <= 122) chars[i] = (219 - c.code).toChar()
         }
-        return new String(chars);
+        return String(chars)
     }
 }

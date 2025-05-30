@@ -1,67 +1,58 @@
-package io.github.tanguygab.playerlistexpansion.groups;
+package io.github.tanguygab.playerlistexpansion.groups
 
-import io.github.tanguygab.playerlistexpansion.PlayerListExpansion;
-import me.clip.placeholderapi.PlaceholderAPI;
-import org.bukkit.OfflinePlayer;
+import io.github.tanguygab.playerlistexpansion.PlayerListExpansion
+import me.clip.placeholderapi.PlaceholderAPI
+import org.bukkit.OfflinePlayer
+import java.util.Collections
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+class ListGroup(private val lists: MutableList<GroupedList>, private val gap: Int) {
 
-public class ListGroup {
+    fun getText(viewer: OfflinePlayer?, arguments: String): String? {
+        val args = arguments.split("_")
+        val format = PlayerListExpansion.get().getFormat(arguments, args)
+        val arg = args[0]
 
-    private final List<GroupedList> lists;
-    private final int gap;
+        val slots = getList(viewer, arg == "amount", format)
 
-    public ListGroup(List<GroupedList> lists, int gap) {
-        this.lists = lists;
-        this.gap = gap;
+        val pos = arg.toIntOrNull()
+        return when {
+            arg == "amount" -> slots.size.toString()
+            pos === null -> null
+            pos >= 0 && pos < slots.size -> slots[pos]
+            else -> ""
+        }
     }
 
-    public String getText(OfflinePlayer viewer, String arguments) {
-        String[] args = arguments.split("_");
-        String format = PlayerListExpansion.get().getFormat(arguments, args);
-        String arg = args[0];
+    private fun getList(viewer: OfflinePlayer?, amount: Boolean, format: String): List<String> {
+        val slots = ArrayList<String>()
 
-        List<String> slots = getList(viewer, arg.equals("amount"), format);
-
-        if (arg.equals("amount")) return slots.size()+"";
-
-        int pos;
-        try {pos = Integer.parseInt(arg);}
-        catch (Exception e) {return null;}
-        return pos >= 0 && pos < slots.size() ? slots.get(pos) : "";
-    }
-
-    private List<String> getList(OfflinePlayer viewer, boolean amount, String format) {
-        List<String> slots = new ArrayList<>();
-
-        for (GroupedList list : lists) {
-            List<String> players = list.getList().getList(viewer, format);
-            if (players.isEmpty()) continue;
+        for (list in lists) {
+            val players = list.list.getList(viewer, format)
+            if (players.isEmpty()) continue
             if (amount) {
-                slots.addAll(players);
-                continue;
+                slots.addAll(players)
+                continue
             }
 
             if (lists.indexOf(list) != 0 && gap != 0) {
-                slots.addAll(Collections.nCopies(gap,""));
+                slots.addAll(Collections.nCopies(gap, ""))
             }
-
-            slots.add(setPlaceholders(viewer, list.getTitle(), "%amount%",players.size()));
-            if (list.getMax() > 0 && players.size() > list.getMax()) {
-                for (int i = 0; i < list.getMax(); i++) {
-                    slots.add(players.get(i));
+            slots.add(setPlaceholders(viewer, list.title, "%amount%", players.size))
+            if (list.max > 0 && players.size > list.max) {
+                for (i in 0..<list.max) {
+                    slots.add(players[i])
                 }
-                slots.add(setPlaceholders(viewer, list.getRemaining(),"%remaining%", players.size() - list.getMax()));
-            } else slots.addAll(players);
+                if (list.remaining !== null)
+                    slots.add(setPlaceholders(viewer, list.remaining, "%remaining%", players.size - list.max))
+                continue
+            }
+            slots.addAll(players)
         }
 
-        return slots;
+        return slots
     }
 
-    private String setPlaceholders(OfflinePlayer viewer, String string, String placeholder, int amount) {
-        return PlaceholderAPI.setPlaceholders(viewer, string.replace(placeholder,amount+""));
+    private fun setPlaceholders(viewer: OfflinePlayer?, string: String, placeholder: String, amount: Int): String {
+        return PlaceholderAPI.setPlaceholders(viewer, string.replace(placeholder, amount.toString() + ""))
     }
-
 }

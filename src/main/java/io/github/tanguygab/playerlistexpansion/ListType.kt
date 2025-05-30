@@ -1,38 +1,25 @@
-package io.github.tanguygab.playerlistexpansion;
+package io.github.tanguygab.playerlistexpansion
 
-import org.bukkit.Bukkit;
-import org.bukkit.OfflinePlayer;
+import org.bukkit.Bukkit
+import org.bukkit.OfflinePlayer
+import java.util.concurrent.Callable
 
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.concurrent.Callable;
-import java.util.stream.Collectors;
+enum class ListType(
+    var callable: Callable<Collection<OfflinePlayer>>?
+) {
+    ONLINE({ Bukkit.getServer().onlinePlayers }),
+    OFFLINE({ Bukkit.getServer().offlinePlayers.filter { p: OfflinePlayer -> !p.isOnline }.toList() }),
+    ALL({ Bukkit.getServer().offlinePlayers.toList() }),
+    CUSTOM(null);
 
-public enum ListType {
-
-    ONLINE(()-> Bukkit.getServer().getOnlinePlayers()),
-    OFFLINE(()-> Arrays.stream(Bukkit.getServer().getOfflinePlayers()).filter(p->!p.isOnline()).collect(Collectors.toList())),
-    ALL(()-> Arrays.asList(Bukkit.getServer().getOfflinePlayers())),
-    CUSTOM;
-
-    Callable<Collection<? extends OfflinePlayer>> callable;
-    ListType() {}
-    ListType(Callable<Collection<? extends OfflinePlayer>> callable) {
-        this.callable = callable;
+    fun getList(): Collection<OfflinePlayer> {
+        return callable!!.call()
     }
 
-    public Collection<? extends OfflinePlayer> getList() {
-        try {return callable.call();}
-        catch (Exception e) {throw new RuntimeException(e);}
+    companion object {
+        fun find(str: String?): ListType? {
+            if (str == null) return null
+            return entries.find { it.name.equals(str, true) }
+        }
     }
-
-    public static ListType find(String str) {
-        if (str == null) return null;
-        str = str.toUpperCase();
-        for (ListType type : values())
-            if (type.toString().equals(str))
-                return type;
-        return null;
-    }
-
 }

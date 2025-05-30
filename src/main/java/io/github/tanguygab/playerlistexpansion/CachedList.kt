@@ -1,26 +1,18 @@
-package io.github.tanguygab.playerlistexpansion;
+package io.github.tanguygab.playerlistexpansion
 
-import org.bukkit.OfflinePlayer;
+import org.bukkit.OfflinePlayer
+import java.util.function.BiFunction
 
-import java.util.List;
-import java.util.function.BiFunction;
+class CachedList(private val function: BiFunction<OfflinePlayer?, String, List<String>>) {
+    private var lastUpdate: Long = 0
+    private var list = listOf<String>()
 
-public class CachedList {
-
-    private long lastUpdate;
-    private final BiFunction<OfflinePlayer, String, List<String>> fun;
-    private List<String> list;
-
-    public CachedList(BiFunction<OfflinePlayer, String, List<String>> fun) {
-        this.fun = fun;
-    }
-
-    public List<String> getList(OfflinePlayer player, String format) {
-        long now = System.currentTimeMillis();
+    fun getList(player: OfflinePlayer?, format: String): List<String> {
+        val now = System.currentTimeMillis()
         if (now - lastUpdate > PlayerListExpansion.get().updateCooldown) {
-            list = fun.apply(player, format);
-            lastUpdate = now;
+            list = function.apply(player, format)
+            lastUpdate = now
         }
-        return list;
+        return list
     }
 }

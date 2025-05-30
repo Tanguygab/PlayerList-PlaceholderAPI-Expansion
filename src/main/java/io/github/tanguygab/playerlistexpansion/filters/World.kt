@@ -1,22 +1,12 @@
-package io.github.tanguygab.playerlistexpansion.filters;
+package io.github.tanguygab.playerlistexpansion.filters
 
-import org.bukkit.OfflinePlayer;
-import org.bukkit.entity.Player;
+import org.bukkit.OfflinePlayer
 
-import java.util.Arrays;
-import java.util.List;
+class World(arg: String) : Filter() {
+    private val worlds = split(arg)
 
-public class World extends Filter {
-
-    private final List<String> worlds;
-
-    public World(String arg) {
-        worlds = Arrays.asList(split(arg));
-    }
-
-    @Override
-    public boolean filter(String name, OfflinePlayer viewer) {
-        Player player = getOnline(name);
-        return player != null && worlds.contains(player.getWorld().getName());
+    override fun filter(name: String?, viewer: OfflinePlayer?): Boolean {
+        val player = getOnline(name)
+        return player != null && worlds.contains(player.world.name)
     }
 }

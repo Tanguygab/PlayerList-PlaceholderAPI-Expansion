@@ -1,33 +1,28 @@
-package io.github.tanguygab.playerlistexpansion.sorting;
+package io.github.tanguygab.playerlistexpansion.sorting
 
-import io.github.tanguygab.playerlistexpansion.PlayerListExpansion;
-import org.bukkit.ChatColor;
-import org.bukkit.OfflinePlayer;
+import io.github.tanguygab.playerlistexpansion.PlayerListExpansion
+import org.bukkit.OfflinePlayer
 
-import java.util.LinkedHashMap;
-import java.util.Map;
+class PLACEHOLDER(arg: String) : SortingType(arg.substring(0, arg.indexOf(":"))) {
+    private val sortingMap = LinkedHashMap<String?, Int?>()
 
-public class PLACEHOLDER extends SortingType {
-
-    private final Map<String,Integer> sortingMap = new LinkedHashMap<>();
-
-    public PLACEHOLDER(String arg) {
-        super(arg.substring(0,arg.indexOf(":")));
-        arg = arg.substring(arg.indexOf(":")+1);
-        if (arg.isEmpty()) {
-            return;
+    init {
+        val arg = arg.substring(arg.indexOf(":") + 1)
+        if (arg.isNotEmpty()) {
+            val outputs = arg.split(PlayerListExpansion.get().argumentSeparator)
+            var index = 1
+            outputs.map { it.split("|") }.flatMap { it }.forEach { it
+                sortingMap.put(color(it.trim().lowercase()), index++)
+            }
         }
-        String[] outputs = arg.split(PlayerListExpansion.get().argumentSeparator);
-        int index = 1;
-        for (String element : outputs)
-            for (String element0 : element.split("\\|"))
-                sortingMap.put(ChatColor.translateAlternateColorCodes('&',element0.trim().toLowerCase()), index++);
     }
 
-    @Override
-    public String getSortingString(String name, OfflinePlayer viewer) {
-        String output = parse(name,viewer);
-        int position = sortingMap.getOrDefault(output,sortingMap.size()+1);
-        return String.valueOf((char) position);
+    override fun getSortingString(name: String, viewer: OfflinePlayer?): String {
+        val output = parse(name, viewer)
+        val position = sortingMap.getOrDefault(output, sortingMap.size + 1)!!
+        return position.toChar().toString()
     }
+
+    @Suppress("DEPRECATION")
+    private fun color(string: String) = net.md_5.bungee.api.ChatColor.translateAlternateColorCodes('&', string)
 }

@@ -1,66 +1,49 @@
-package io.github.tanguygab.playerlistexpansion.sorting;
+package io.github.tanguygab.playerlistexpansion.sorting
 
-import me.clip.placeholderapi.PlaceholderAPI;
-import org.bukkit.Bukkit;
-import org.bukkit.OfflinePlayer;
-import org.bukkit.entity.Player;
+import me.clip.placeholderapi.PlaceholderAPI
+import org.bukkit.Bukkit
+import org.bukkit.OfflinePlayer
+import java.util.function.Function
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.function.Function;
+abstract class SortingType protected constructor(
+    private val placeholder: String?
+) {
 
-public abstract class SortingType {
+    protected fun parse(name: String, viewer: OfflinePlayer?): String {
+        if (placeholder === null || placeholder.isBlank()) return name
+        if (!placeholder.contains("%")) return placeholder
 
-    @SuppressWarnings("all")
-    private static final Map<String, Function<String, SortingType>> types = new HashMap<String,Function<String,SortingType>>() {{
-        put("A_TO_Z",A_TO_Z::new);
-        put("Z_TO_A",Z_TO_A::new);
-        put("LOW_TO_HIGH",LOW_TO_HIGH::new);
-        put("HIGH_TO_LOW",HIGH_TO_LOW::new);
-        put("PLACEHOLDER",PLACEHOLDER::new);
-    }};
+        var output = placeholder
+        val player = Bukkit.getServer().getOfflinePlayerIfCached(name)
+        if (player?.player != null && viewer?.player != null)
+            output = PlaceholderAPI.setRelationalPlaceholders(viewer.player, player.player, output)
 
-    public static SortingType find(String string) {
-        int index = string.indexOf(":");
-        String type = index == -1 ? string : string.substring(0,index);
-        type = type.toUpperCase();
-        String arg = index == -1 ? null : string.substring(index+1);
-        return types.containsKey(type) ? types.get(type).apply(arg) : null;
+        output = PlaceholderAPI.setPlaceholders(player, output)
+        return output
     }
 
-    protected final static int DEFAULT_NUMBER = Integer.MAX_VALUE /2;
+    abstract fun getSortingString(name: String, viewer: OfflinePlayer?): String
 
-    private final String placeholder;
-
-    protected SortingType(String placeholder) {
-        this.placeholder = placeholder;
+    protected fun parseDouble(number: String?): Double {
+        return number?.toDoubleOrNull() ?: 0.0
     }
 
-    protected String parse(String name, OfflinePlayer viewer) {
-        if (placeholder == null || placeholder.isEmpty()) return name;
-        if (!placeholder.contains("%")) return placeholder;
+    companion object {
+        protected const val DEFAULT_NUMBER: Int = Int.MAX_VALUE / 2
 
-        String output = placeholder;
-        Player onlinePlayer = Bukkit.getPlayerExact(name);
-        if (onlinePlayer != null && viewer.getPlayer() != null)
-            output = PlaceholderAPI.setRelationalPlaceholders(viewer.getPlayer(),onlinePlayer,output);
+        private val types = HashMap<String, Function<String?, SortingType>>().apply {
+            put("A_TO_Z") { A_TO_Z(it) }
+            put("Z_TO_A") { Z_TO_A(it) }
+            put("LOW_TO_HIGH") { LOW_TO_HIGH(it) }
+            put("HIGH_TO_LOW") { HIGH_TO_LOW(it) }
+            put("PLACEHOLDER") { PLACEHOLDER(it!!) }
+        }
 
-        output = PlaceholderAPI.setPlaceholders(onlinePlayer == null ? getOffline(name) : onlinePlayer, output);
-        return output;
+        fun find(string: String): SortingType? {
+            val args = string.split(":", limit = 2)
+            val type = args[0].uppercase()
+            val arg = if (args.size > 1) args[1] else null
+            return if (types.containsKey(type)) types[type]!!.apply(arg) else null
+        }
     }
-
-    protected OfflinePlayer getOffline(String name) {
-        for (OfflinePlayer player : Bukkit.getServer().getOfflinePlayers())
-            if (name.equals(player.getName()))
-                return player;
-        return null;
-    }
-
-    protected double parseDouble(String string) {
-        try {return Double.parseDouble(string);}
-        catch (Exception e) {return 0;}
-    }
-
-    public abstract String getSortingString(String name, OfflinePlayer viewer);
-
 }

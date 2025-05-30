@@ -1,64 +1,57 @@
-package io.github.tanguygab.playerlistexpansion.filters;
+package io.github.tanguygab.playerlistexpansion.filters
 
-import io.github.tanguygab.playerlistexpansion.PlayerListExpansion;
-import org.bukkit.Bukkit;
-import org.bukkit.OfflinePlayer;
-import org.bukkit.entity.Player;
+import io.github.tanguygab.playerlistexpansion.PlayerListExpansion
+import org.bukkit.Bukkit
+import org.bukkit.OfflinePlayer
+import org.bukkit.entity.Player
+import java.util.*
+import java.util.function.Function
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.function.Function;
+abstract class Filter {
+    var isInverted: Boolean = false
+        private set
 
-public abstract class Filter {
+    protected fun split(arg: String): List<String> {
+        return arg.split(PlayerListExpansion.get().argumentSeparator)
+    }
 
-    private boolean inverted = false;
+    protected fun getOffline(name: String?): OfflinePlayer? {
+        return if (name === null) null else Bukkit.getServer().getOfflinePlayerIfCached(name)
+    }
 
-    @SuppressWarnings("all")
-    private static final Map<String,Function<String,Filter>> filters = new HashMap<String,Function<String,Filter>>() {{
-        put("BANNED",arg->new Banned());
-        put("CANSEE",arg->new CanSee());
-        put("GAMEMODE",GameMode::new);
-        put("NEARBY",Nearby::new);
-        put("PERMISSION",Permission::new);
-        put("PLACEHOLDER",Placeholder::new);
-        if (Bukkit.getServer().getPluginManager().isPluginEnabled("ViaVersion"))
-            put("VERSION",Version::new);
-        put("WHITELISTED",arg->new Whitelisted());
-        put("WORLD",World::new);
-    }};
-    public static Filter find(String string) {
-        int index = string.indexOf(":");
-        String filter = index == -1 ? string : string.substring(0,index);
-        filter = filter.toUpperCase();
-        String arg = index == -1 ? null : string.substring(index+1);
+    protected fun getOnline(name: String?): Player? {
+        return if (name === null) null else Bukkit.getServer().getPlayerExact(name)
+    }
 
-        boolean inverted = filter.charAt(0) == '!';
-        if (inverted) filter = filter.substring(1);
+    abstract fun filter(name: String?, viewer: OfflinePlayer?): Boolean
 
-        if (filters.containsKey(filter)) {
-            Filter f = filters.get(filter).apply(arg);
-            f.inverted = inverted;
-            return f;
+    companion object {
+        private val filters = HashMap<String, Function<String?, Filter>>().apply {
+            put("BANNED") { Banned() }
+            put("CANSEE") { CanSee() }
+            put("GAMEMODE") { GameMode(it) }
+            put("NEARBY") { Nearby(it!!) }
+            put("PERMISSION") { Permission(it!!) }
+            put("PLACEHOLDER") { Placeholder(it!!) }
+            if (Bukkit.getServer().pluginManager.isPluginEnabled("ViaVersion"))
+                put("VERSION") { Version(it!!) }
+            put("WHITELISTED") { Whitelisted() }
+            put("WORLD") { World(it!!) }
         }
-        return null;
-    }
 
-    public boolean isInverted() {
-        return inverted;
-    }
+        fun find(string: String): Filter? {
+            val args = string.split(":", limit = 2)
 
-    protected String[] split(String arg) {
-        return arg.split(PlayerListExpansion.get().argumentSeparator);
-    }
+            val inverted = args[0][0] == '!'
+            val filter = args[0].uppercase().substring(if (inverted) 1 else 0)
+            val arg = if (args.size > 1) args[1] else null
 
-    protected OfflinePlayer getOffline(String name) {
-        if (name == null) return null;
-        return Bukkit.getServer().getOfflinePlayerIfCached(name);
+            if (filters.containsKey(filter)) {
+                val f = filters[filter]!!.apply(arg)
+                f.isInverted = inverted
+                return f
+            }
+            return null
+        }
     }
-    protected Player getOnline(String name) {
-        return Bukkit.getServer().getPlayerExact(name);
-    }
-
-    public abstract boolean filter(String name, OfflinePlayer viewer);
-
 }

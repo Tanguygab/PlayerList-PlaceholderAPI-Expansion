@@ -1,15 +1,9 @@
-package io.github.tanguygab.playerlistexpansion.sorting;
+package io.github.tanguygab.playerlistexpansion.sorting
 
-import org.bukkit.OfflinePlayer;
+import org.bukkit.OfflinePlayer
 
-public class A_TO_Z extends SortingType {
-
-    public A_TO_Z(String arg) {
-        super(arg);
-    }
-
-    @Override
-    public String getSortingString(String name, OfflinePlayer viewer) {
-        return parse(name,viewer);
+class A_TO_Z(arg: String?) : SortingType(arg) {
+    override fun getSortingString(name: String, viewer: OfflinePlayer?): String {
+        return parse(name, viewer)
     }
 }

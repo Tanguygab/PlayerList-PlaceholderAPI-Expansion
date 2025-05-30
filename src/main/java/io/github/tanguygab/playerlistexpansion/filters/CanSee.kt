@@ -1,15 +1,11 @@
-package io.github.tanguygab.playerlistexpansion.filters;
+package io.github.tanguygab.playerlistexpansion.filters
 
-import org.bukkit.OfflinePlayer;
-import org.bukkit.entity.Player;
+import org.bukkit.OfflinePlayer
 
-public class CanSee extends Filter {
-
-    @Override
-    public boolean filter(String name, OfflinePlayer viewer) {
-        Player player = getOnline(name);
-        Player viewerPlayer = viewer.getPlayer();
-        return player != null && viewerPlayer != null && viewerPlayer.canSee(player);
+class CanSee : Filter() {
+    override fun filter(name: String?, viewer: OfflinePlayer?): Boolean {
+        val player = getOnline(name)
+        val viewerPlayer = viewer?.player
+        return player != null && viewerPlayer != null && viewerPlayer.canSee(player)
     }
-
 }

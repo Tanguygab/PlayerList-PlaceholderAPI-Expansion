@@ -1,17 +1,11 @@
-package io.github.tanguygab.playerlistexpansion.sorting;
+package io.github.tanguygab.playerlistexpansion.sorting
 
-import org.bukkit.OfflinePlayer;
+import org.bukkit.OfflinePlayer
 
-public class HIGH_TO_LOW extends SortingType {
-
-    public HIGH_TO_LOW(String arg) {
-        super(arg);
-    }
-
-    @Override
-    public String getSortingString(String name, OfflinePlayer viewer) {
-        String string = parse(name,viewer);
-        double num = DEFAULT_NUMBER - parseDouble(string);
-        return String.valueOf(num);
+class HIGH_TO_LOW(arg: String?) : SortingType(arg) {
+    override fun getSortingString(name: String, viewer: OfflinePlayer?): String {
+        val string = parse(name, viewer)
+        val num: Double = DEFAULT_NUMBER - parseDouble(string)
+        return num.toString()
     }
 }
