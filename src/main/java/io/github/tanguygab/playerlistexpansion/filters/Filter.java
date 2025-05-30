@@ -53,10 +53,7 @@ public abstract class Filter {
 
     protected OfflinePlayer getOffline(String name) {
         if (name == null) return null;
-        for (OfflinePlayer player : Bukkit.getServer().getOfflinePlayers())
-            if (name.equals(player.getName()))
-                return player;
-        return null;
+        return Bukkit.getServer().getOfflinePlayerIfCached(name);
     }
     protected Player getOnline(String name) {
         return Bukkit.getServer().getPlayerExact(name);

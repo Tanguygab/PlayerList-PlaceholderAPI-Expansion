@@ -3,20 +3,12 @@ plugins {
 }
 
 group = 'io.github.tanguygab'
-version = '3.0.9'
-
-sourceCompatibility = '1.8'
-targetCompatibility = '1.8'
+version = '3.1.0'
 
 repositories {
-    mavenCentral()
     maven {
-        name = 'spigotmc-repo'
-        url = 'https://hub.spigotmc.org/nexus/content/repositories/snapshots/'
-    }
-    maven {
-        name = 'sonatype'
-        url = 'https://oss.sonatype.org/content/groups/public/'
+        name = "papermc"
+        url = uri("https://repo.papermc.io/repository/maven-public/")
     }
     maven {
         name = 'papi-repo'
@@ -29,7 +21,7 @@ repositories {
 }
 
 dependencies {
-    compileOnly 'org.spigotmc:spigot-api:1.20.2-R0.1-SNAPSHOT'
+    compileOnly 'io.papermc.paper:paper-api:1.21.5-R0.1-SNAPSHOT'
     compileOnly 'me.clip:placeholderapi:2.11.6'
     compileOnly 'com.viaversion:viaversion-api:4.7.0'
 }
