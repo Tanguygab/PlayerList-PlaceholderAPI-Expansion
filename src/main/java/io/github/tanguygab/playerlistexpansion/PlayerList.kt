@@ -9,7 +9,6 @@ import java.util.TreeMap
 import java.util.WeakHashMap
 import java.util.stream.Collectors
 import java.util.stream.Stream
-import kotlin.Boolean
 
 class PlayerList(
     private val name: String,
