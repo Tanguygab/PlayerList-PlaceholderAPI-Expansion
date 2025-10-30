@@ -44,7 +44,7 @@ public class ListGroup {
                 continue;
             }
 
-            if (lists.indexOf(list) != 0 && gap != 0) {
+            if (!slots.isEmpty() && gap != 0) {
                 slots.addAll(Collections.nCopies(gap,""));
             }
 
