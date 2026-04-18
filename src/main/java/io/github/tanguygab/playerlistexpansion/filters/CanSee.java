@@ -7,6 +7,7 @@ public class CanSee extends Filter {
 
     @Override
     public boolean filter(String name, OfflinePlayer viewer) {
+        if (viewer == null) return true;
         Player player = getOnline(name);
         Player viewerPlayer = viewer.getPlayer();
         return player != null && viewerPlayer != null && viewerPlayer.canSee(player);
